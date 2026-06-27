@@ -21,6 +21,8 @@
 
   const baseUrl = "https://www.ashva.ae";
   let panoramaObjectUrl = "";
+  let panoramaPreviewUrl = "";
+  let selectedPanoramaFile = null;
   let previewPageUrl = "";
   let previewStyleUrl = "";
   let previewScriptUrl = "";
@@ -66,15 +68,34 @@
     statusText.textContent = message;
   }
 
-  function setPanoramaFile(file) {
+  function readFileAsDataUrl(file) {
+    return new Promise(function (resolve, reject) {
+      const reader = new FileReader();
+      reader.onload = function () {
+        resolve(reader.result);
+      };
+      reader.onerror = function () {
+        reject(reader.error);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function setPanoramaFile(file, shouldSyncInput) {
     if (!file || !file.type.startsWith("image/")) {
       setStatus("Please choose an image file.");
       return;
     }
 
-    const transfer = new DataTransfer();
-    transfer.items.add(file);
-    panoramaFile.files = transfer.files;
+    selectedPanoramaFile = file;
+    if (shouldSyncInput) {
+      try {
+        const transfer = new DataTransfer();
+        transfer.items.add(file);
+        panoramaFile.files = transfer.files;
+      } catch (error) {}
+    }
+
     fileName.textContent = file.name;
 
     if (panoramaObjectUrl) {
@@ -82,8 +103,9 @@
     }
 
     panoramaObjectUrl = URL.createObjectURL(file);
+    panoramaPreviewUrl = await readFileAsDataUrl(file);
     setStatus("Panorama selected. Refreshing the 3D viewer preview...");
-    openTemporaryPreview();
+    await openTemporaryPreview();
   }
 
   function addHotspotRow(data) {
@@ -196,13 +218,15 @@
 
   async function openTemporaryPreview() {
     const path = routePath();
-    const file = panoramaFile.files[0];
+    const file = selectedPanoramaFile || panoramaFile.files[0];
     if (!path) {
       setStatus("Enter project name and view path first.");
       return;
     }
     if (!file) {
-      setStatus("Choose or drop a panorama image first.");
+      viewerFrame.src = shareLink.value;
+      viewerDropZone.classList.add("has-viewer");
+      setStatus("Loaded the generated client link in the viewer.");
       return;
     }
 
@@ -220,7 +244,7 @@
     previewStyleUrl = URL.createObjectURL(new Blob([viewerStyles], { type: "text/css" }));
     previewScriptUrl = URL.createObjectURL(new Blob([viewerScript], { type: "text/javascript" }));
     const config = {
-      panorama: panoramaObjectUrl,
+      panorama: panoramaPreviewUrl || panoramaObjectUrl,
       hotspots: collectHotspots()
     };
 
@@ -261,7 +285,7 @@ window.fetch = function(resource, options) {
 
   async function downloadPackage() {
     const path = routePath();
-    const file = panoramaFile.files[0];
+    const file = selectedPanoramaFile || panoramaFile.files[0];
     if (!path) {
       setStatus("Enter project name and view path first.");
       return;
@@ -396,7 +420,7 @@ window.fetch = function(resource, options) {
   panoramaFile.addEventListener("change", function () {
     const file = panoramaFile.files[0];
     if (file) {
-      setPanoramaFile(file);
+      setPanoramaFile(file, false);
     }
   });
   dropZone.addEventListener("dragover", function (event) {
@@ -409,7 +433,7 @@ window.fetch = function(resource, options) {
   dropZone.addEventListener("drop", function (event) {
     event.preventDefault();
     dropZone.classList.remove("is-dragging");
-    setPanoramaFile(event.dataTransfer.files[0]);
+    setPanoramaFile(event.dataTransfer.files[0], true);
   });
   viewerDropZone.addEventListener("dragover", function (event) {
     event.preventDefault();
@@ -423,7 +447,7 @@ window.fetch = function(resource, options) {
   viewerDropZone.addEventListener("drop", function (event) {
     event.preventDefault();
     viewerDropOverlay.classList.remove("is-visible");
-    setPanoramaFile(event.dataTransfer.files[0]);
+    setPanoramaFile(event.dataTransfer.files[0], true);
   });
   fullscreenPreview.addEventListener("click", function () {
     if (viewerDropZone.requestFullscreen) {
@@ -434,6 +458,10 @@ window.fetch = function(resource, options) {
   openLink.addEventListener("click", function () {
     updateLink();
     if (shareLink.value) {
+      if (!selectedPanoramaFile) {
+        viewerFrame.src = shareLink.value;
+        viewerDropZone.classList.add("has-viewer");
+      }
       setStatus("Client link created. Copy it or download the upload ZIP to publish this view.");
     }
   });
@@ -442,4 +470,6 @@ window.fetch = function(resource, options) {
   projectName.value = "as005";
   viewPath.value = "room/view1";
   updateLink();
+  viewerFrame.src = shareLink.value;
+  viewerDropZone.classList.add("has-viewer");
 }());
