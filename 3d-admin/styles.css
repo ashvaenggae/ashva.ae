@@ -269,6 +269,31 @@ input {
   gap: 10px;
 }
 
+.token-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 74px;
+  gap: 10px;
+  align-items: center;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+}
+
+.check-row input {
+  width: 18px;
+  min-height: 18px;
+  accent-color: var(--green);
+}
+
+#forgetToken {
+  min-height: 38px;
+  padding: 0 10px;
+}
+
 .hotspot-rows {
   display: grid;
   gap: 10px;
@@ -341,6 +366,7 @@ input {
 
   .form-grid,
   .copy-row,
+  .token-actions,
   .hotspot-row {
     grid-template-columns: 1fr;
   }

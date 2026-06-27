@@ -9,6 +9,8 @@
   const shareLink = document.getElementById("shareLink");
   const copyLink = document.getElementById("copyLink");
   const githubToken = document.getElementById("githubToken");
+  const rememberToken = document.getElementById("rememberToken");
+  const forgetToken = document.getElementById("forgetToken");
   const addHotspot = document.getElementById("addHotspot");
   const hotspotRows = document.getElementById("hotspotRows");
   const viewerDropZone = document.getElementById("viewerDropZone");
@@ -21,6 +23,7 @@
   const statusText = document.getElementById("statusText");
 
   const baseUrl = "https://www.ashva.ae";
+  const tokenStorageKey = "ashva3dGithubToken";
   let panoramaObjectUrl = "";
   let panoramaPreviewUrl = "";
   let selectedPanoramaFile = null;
@@ -74,6 +77,27 @@
 
   function setStatus(message) {
     statusText.textContent = message;
+  }
+
+  function loadSavedToken() {
+    try {
+      const savedToken = localStorage.getItem(tokenStorageKey);
+      if (savedToken) {
+        githubToken.value = savedToken;
+        rememberToken.checked = true;
+        setStatus("Saved GitHub token loaded for this browser.");
+      }
+    } catch (error) {}
+  }
+
+  function syncSavedToken(token) {
+    try {
+      if (rememberToken.checked && token) {
+        localStorage.setItem(tokenStorageKey, token);
+        return;
+      }
+      localStorage.removeItem(tokenStorageKey);
+    } catch (error) {}
   }
 
   function readFileAsDataUrl(file) {
@@ -407,11 +431,12 @@ window.fetch = function(resource, options) {
     updateLink();
     const token = githubToken.value.trim();
     if (!token) {
-      setStatus("Paste a GitHub token first. It is used only for this publish and is not saved.");
+      setStatus("Paste a GitHub token once, or use a saved token on this browser.");
       githubToken.focus();
       return;
     }
 
+    syncSavedToken(token);
     const packageData = await createViewerFiles();
     if (!packageData) {
       return;
@@ -520,6 +545,16 @@ window.fetch = function(resource, options) {
       copyLink.textContent = "Copy";
     }, 1200);
   });
+  rememberToken.addEventListener("change", function () {
+    syncSavedToken(githubToken.value.trim());
+    setStatus(rememberToken.checked ? "Token will be remembered on this browser." : "Saved token removed from this browser.");
+  });
+  forgetToken.addEventListener("click", function () {
+    githubToken.value = "";
+    rememberToken.checked = false;
+    syncSavedToken("");
+    setStatus("Saved GitHub token cleared from this browser.");
+  });
   panoramaFile.addEventListener("change", function () {
     const file = panoramaFile.files[0];
     if (file) {
@@ -568,6 +603,7 @@ window.fetch = function(resource, options) {
   projectName.value = "as005";
   viewPath.value = "room/view1";
   updateLink();
+  loadSavedToken();
   viewerFrame.src = embedUrl(shareLink.value);
   viewerDropZone.classList.add("has-viewer");
 }());

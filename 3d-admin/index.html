@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ashva 3D Admin</title>
-    <link rel="stylesheet" href="styles.css?v=20260627-2">
+    <link rel="stylesheet" href="styles.css?v=20260627-3">
   </head>
   <body>
     <main class="admin-shell">
@@ -70,6 +70,13 @@
             GitHub token
             <input id="githubToken" type="password" placeholder="Fine-grained token with Contents read/write">
           </label>
+          <div class="token-actions">
+            <label class="check-row">
+              <input id="rememberToken" type="checkbox">
+              <span>Remember on this browser</span>
+            </label>
+            <button id="forgetToken" type="button">Clear</button>
+          </div>
         </section>
 
         <section class="panel">
@@ -90,11 +97,11 @@
 
         <div class="notes">
           <p><strong>How it goes live</strong></p>
-          <p>Use Create Client Link with a GitHub token to publish directly, or download the ZIP for manual upload.</p>
+          <p>Paste the GitHub token once and choose Remember on this browser. After that, Create Client Link can publish directly from this computer.</p>
         </div>
       </aside>
     </main>
 
-    <script src="app.js?v=20260627-2"></script>
+    <script src="app.js?v=20260627-3"></script>
   </body>
 </html>
