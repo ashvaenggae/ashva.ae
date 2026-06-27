@@ -34,12 +34,12 @@
             </label>
           </div>
 
-          <label class="upload-card" for="panoramaFile">
+          <label id="dropZone" class="upload-card" for="panoramaFile">
             <input id="panoramaFile" type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml">
             <span class="upload-mark">+</span>
             <span>
-              <strong id="fileName">Choose panorama image</strong>
-              <small>Use an equirectangular JPG, PNG, WebP, or SVG</small>
+              <strong id="fileName">Choose or drop panorama image</strong>
+              <small>Drag a 360 JPG, PNG, WebP, or SVG here</small>
             </span>
           </label>
         </section>
@@ -76,6 +76,8 @@
         </div>
 
         <div class="publish-actions">
+          <button id="previewViewer" type="button">Preview 3D Viewer</button>
+          <button id="openLink" type="button">Open Client Link</button>
           <button id="downloadZip" type="button">Download Upload ZIP</button>
           <p id="statusText">Create a project, choose a panorama, then download the ready website folder.</p>
         </div>

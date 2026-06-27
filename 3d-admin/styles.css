@@ -159,6 +159,11 @@ input {
   cursor: pointer;
 }
 
+.upload-card.is-dragging {
+  border-color: var(--green);
+  background: rgba(65, 211, 154, 0.1);
+}
+
 .upload-card input {
   position: absolute;
   width: 1px;
@@ -260,6 +265,10 @@ input {
 
 .publish-actions button {
   min-height: 50px;
+}
+
+#downloadZip,
+#previewViewer {
   background: var(--green);
   color: #06120e;
 }

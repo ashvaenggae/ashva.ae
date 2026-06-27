@@ -4,6 +4,7 @@
   const projectName = document.getElementById("projectName");
   const viewPath = document.getElementById("viewPath");
   const panoramaFile = document.getElementById("panoramaFile");
+  const dropZone = document.getElementById("dropZone");
   const fileName = document.getElementById("fileName");
   const shareLink = document.getElementById("shareLink");
   const copyLink = document.getElementById("copyLink");
@@ -11,6 +12,8 @@
   const hotspotRows = document.getElementById("hotspotRows");
   const previewImage = document.getElementById("previewImage");
   const previewBox = document.querySelector(".preview-box");
+  const previewViewer = document.getElementById("previewViewer");
+  const openLink = document.getElementById("openLink");
   const downloadZip = document.getElementById("downloadZip");
   const statusText = document.getElementById("statusText");
 
@@ -56,6 +59,27 @@
 
   function setStatus(message) {
     statusText.textContent = message;
+  }
+
+  function setPanoramaFile(file) {
+    if (!file || !file.type.startsWith("image/")) {
+      setStatus("Please choose an image file.");
+      return;
+    }
+
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    panoramaFile.files = transfer.files;
+    fileName.textContent = file.name;
+
+    if (panoramaObjectUrl) {
+      URL.revokeObjectURL(panoramaObjectUrl);
+    }
+
+    panoramaObjectUrl = URL.createObjectURL(file);
+    previewImage.src = panoramaObjectUrl;
+    previewBox.classList.add("has-image");
+    setStatus("Panorama selected. Preview it or download the upload ZIP.");
   }
 
   function addHotspotRow(data) {
@@ -164,6 +188,58 @@
   </body>
 </html>
 `;
+  }
+
+  async function openTemporaryPreview() {
+    const path = routePath();
+    const file = panoramaFile.files[0];
+    if (!path) {
+      setStatus("Enter project name and view path first.");
+      return;
+    }
+    if (!file) {
+      setStatus("Choose or drop a panorama image first.");
+      return;
+    }
+
+    setStatus("Opening temporary 3D preview...");
+    const title = `${slugifyPath(projectName.value).toUpperCase()} ${slugifyPath(viewPath.value).replace(/\//g, " ")}`;
+    const [viewerScript, viewerStyles] = await Promise.all([
+      fetch("../3dviewdesigns/as005/room/view1/app.js").then((response) => response.text()),
+      fetch("../3dviewdesigns/as005/room/view1/styles.css").then((response) => response.text())
+    ]);
+
+    const styleUrl = URL.createObjectURL(new Blob([viewerStyles], { type: "text/css" }));
+    const scriptUrl = URL.createObjectURL(new Blob([viewerScript], { type: "text/javascript" }));
+    const config = {
+      panorama: panoramaObjectUrl,
+      hotspots: collectHotspots()
+    };
+
+    const html = viewerIndex(title)
+      .replace('href="styles.css"', `href="${styleUrl}"`)
+      .replace(
+        "<script src=\"app.js\"></script>",
+        `<script>
+window.__ASHVA_VIEW_CONFIG__ = ${JSON.stringify(config)};
+const nativeFetch = window.fetch.bind(window);
+window.fetch = function(resource, options) {
+  const url = String(resource);
+  if (url.endsWith("view.json")) {
+    return Promise.resolve(new Response(JSON.stringify(window.__ASHVA_VIEW_CONFIG__), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    }));
+  }
+  return nativeFetch(resource, options);
+};
+</script>
+<script src="${scriptUrl}"></script>`
+      );
+
+    const previewUrl = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+    window.open(previewUrl, "_blank", "noopener");
+    setStatus("Temporary preview opened with viewer controls.");
   }
 
   function escapeHtml(value) {
@@ -310,14 +386,27 @@
   });
   panoramaFile.addEventListener("change", function () {
     const file = panoramaFile.files[0];
-    if (!file) return;
-    fileName.textContent = file.name;
-    if (panoramaObjectUrl) {
-      URL.revokeObjectURL(panoramaObjectUrl);
+    if (file) {
+      setPanoramaFile(file);
     }
-    panoramaObjectUrl = URL.createObjectURL(file);
-    previewImage.src = panoramaObjectUrl;
-    previewBox.classList.add("has-image");
+  });
+  dropZone.addEventListener("dragover", function (event) {
+    event.preventDefault();
+    dropZone.classList.add("is-dragging");
+  });
+  dropZone.addEventListener("dragleave", function () {
+    dropZone.classList.remove("is-dragging");
+  });
+  dropZone.addEventListener("drop", function (event) {
+    event.preventDefault();
+    dropZone.classList.remove("is-dragging");
+    setPanoramaFile(event.dataTransfer.files[0]);
+  });
+  previewViewer.addEventListener("click", openTemporaryPreview);
+  openLink.addEventListener("click", function () {
+    if (shareLink.value) {
+      window.open(shareLink.value, "_blank", "noopener");
+    }
   });
   downloadZip.addEventListener("click", downloadPackage);
 
