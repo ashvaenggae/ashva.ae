@@ -3,14 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AS005 Room View 1</title>
-    <link rel="stylesheet" href="/styles.css?v=20260627-2">
+    <title>AS005 room view1</title>
+    <link rel="stylesheet" href="styles.css?v=20260627-2">
   </head>
   <body>
     <main class="app-shell">
       <section class="viewer-panel" aria-label="360 panorama viewer">
         <canvas id="viewer" aria-label="Interactive 360 panorama canvas"></canvas>
-
         <div id="emptyState" class="empty-state">
           <div>
             <p class="kicker">360 Viewer</p>
@@ -18,36 +17,22 @@
             <p>This shared view is loading the assigned 360 image.</p>
           </div>
         </div>
-
-        <div id="dropOverlay" class="drop-overlay">
-          <span>Drop panorama image</span>
-        </div>
-
-        <button id="exitFullscreen" class="exit-fullscreen hidden" type="button" title="Exit fullscreen" aria-label="Exit fullscreen">
-          ×
-        </button>
+        <div id="dropOverlay" class="drop-overlay"><span>Drop panorama image</span></div>
+        <button id="exitFullscreen" class="exit-fullscreen hidden" type="button" title="Exit fullscreen" aria-label="Exit fullscreen">x</button>
       </section>
-
       <aside class="tool-panel" aria-label="Viewer controls">
         <div class="brand-row">
           <div>
             <p class="kicker">Ashva 3D View</p>
-            <h2>AS005 Room View 1</h2>
+            <h2>AS005 room view1</h2>
           </div>
-          <button id="resetView" class="icon-button" type="button" title="Reset view" aria-label="Reset view">
-            <span aria-hidden="true">↺</span>
-          </button>
+          <button id="resetView" class="icon-button" type="button" title="Reset view" aria-label="Reset view"><span aria-hidden="true">↺</span></button>
         </div>
-
         <label class="upload-zone" for="imageInput">
           <input id="imageInput" type="file" accept="image/jpeg,image/png,image/webp">
-          <span class="upload-icon" aria-hidden="true">＋</span>
-          <span>
-            <strong>Choose panorama</strong>
-            <small>JPG, PNG, or WebP</small>
-          </span>
+          <span class="upload-icon" aria-hidden="true">+</span>
+          <span><strong>Choose panorama</strong><small>JPG, PNG, or WebP</small></span>
         </label>
-
         <div class="control-group">
           <label for="modeSelect">View mode</label>
           <select id="modeSelect">
@@ -55,58 +40,29 @@
             <option value="cardboard">Google Cardboard split view</option>
           </select>
         </div>
-
         <div class="button-grid">
           <button id="fullscreenBtn" type="button">Fullscreen</button>
           <button id="cardboardBtn" type="button">Cardboard</button>
           <button id="motionBtn" type="button">Motion</button>
         </div>
-
-        <div class="control-group">
-          <label for="fovRange">Zoom</label>
-          <input id="fovRange" type="range" min="35" max="95" value="70">
-        </div>
-
-        <div class="control-group">
-          <label for="stereoRange">Cardboard depth</label>
-          <input id="stereoRange" type="range" min="0" max="7" value="3" step="0.5">
-        </div>
-
+        <div class="control-group"><label for="fovRange">Zoom</label><input id="fovRange" type="range" min="35" max="95" value="70"></div>
+        <div class="control-group"><label for="stereoRange">Cardboard depth</label><input id="stereoRange" type="range" min="0" max="7" value="3" step="0.5"></div>
         <div class="hotspot-editor">
-          <div class="section-title">
-            <h3>Custom Links</h3>
-            <button id="addHotspot" type="button">Add</button>
-          </div>
+          <div class="section-title"><h3>Custom Links</h3><button id="addHotspot" type="button">Add</button></div>
           <p class="hint">Point the view at a location, then add a label and URL.</p>
-
           <div class="field-stack">
-            <label>
-              Project name
-              <input id="projectName" type="text" placeholder="as005">
-            </label>
-            <label>
-              Label
-              <input id="hotspotLabel" type="text" placeholder="room/view1">
-            </label>
-            <label>
-              Link
-              <span class="copy-field">
-                <input id="hotspotUrl" type="url" placeholder="https://www.ashva.ae/3dviewdesigns/as005/room/view1/">
-                <button id="copyLink" type="button">Copy</button>
-              </span>
-            </label>
+            <label>Project name<input id="projectName" type="text" placeholder="as005"></label>
+            <label>Label<input id="hotspotLabel" type="text" placeholder="room/view1"></label>
+            <label>Link<span class="copy-field"><input id="hotspotUrl" type="url" placeholder="https://www.ashva.ae/3dviewdesigns/as005/room/view1/"><button id="copyLink" type="button">Copy</button></span></label>
           </div>
-
           <div id="hotspotList" class="hotspot-list" aria-live="polite"></div>
         </div>
-
         <div class="tips">
           <p><strong>Controls</strong></p>
           <p>Drag to look around. Use the mouse wheel or zoom slider to zoom. In Cardboard mode, rotate the phone or drag before placing it into the headset.</p>
         </div>
       </aside>
     </main>
-
-    <script src="/app.js?v=20260627-2"></script>
+    <script src="app.js?v=20260627-2"></script>
   </body>
 </html>
