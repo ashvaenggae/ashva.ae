@@ -10,8 +10,10 @@
   const copyLink = document.getElementById("copyLink");
   const addHotspot = document.getElementById("addHotspot");
   const hotspotRows = document.getElementById("hotspotRows");
-  const previewImage = document.getElementById("previewImage");
-  const previewBox = document.querySelector(".preview-box");
+  const viewerDropZone = document.getElementById("viewerDropZone");
+  const viewerDropOverlay = document.getElementById("viewerDropOverlay");
+  const viewerFrame = document.getElementById("viewerFrame");
+  const fullscreenPreview = document.getElementById("fullscreenPreview");
   const previewViewer = document.getElementById("previewViewer");
   const openLink = document.getElementById("openLink");
   const downloadZip = document.getElementById("downloadZip");
@@ -19,6 +21,9 @@
 
   const baseUrl = "https://www.ashva.ae";
   let panoramaObjectUrl = "";
+  let previewPageUrl = "";
+  let previewStyleUrl = "";
+  let previewScriptUrl = "";
 
   function slugifyPath(value) {
     return value
@@ -77,9 +82,8 @@
     }
 
     panoramaObjectUrl = URL.createObjectURL(file);
-    previewImage.src = panoramaObjectUrl;
-    previewBox.classList.add("has-image");
-    setStatus("Panorama selected. Preview it or download the upload ZIP.");
+    setStatus("Panorama selected. Refreshing the 3D viewer preview...");
+    openTemporaryPreview();
   }
 
   function addHotspotRow(data) {
@@ -202,22 +206,26 @@
       return;
     }
 
-    setStatus("Opening temporary 3D preview...");
+    setStatus("Refreshing temporary 3D preview...");
     const title = `${slugifyPath(projectName.value).toUpperCase()} ${slugifyPath(viewPath.value).replace(/\//g, " ")}`;
     const [viewerScript, viewerStyles] = await Promise.all([
       fetch("../3dviewdesigns/as005/room/view1/app.js").then((response) => response.text()),
       fetch("../3dviewdesigns/as005/room/view1/styles.css").then((response) => response.text())
     ]);
 
-    const styleUrl = URL.createObjectURL(new Blob([viewerStyles], { type: "text/css" }));
-    const scriptUrl = URL.createObjectURL(new Blob([viewerScript], { type: "text/javascript" }));
+    if (previewPageUrl) URL.revokeObjectURL(previewPageUrl);
+    if (previewStyleUrl) URL.revokeObjectURL(previewStyleUrl);
+    if (previewScriptUrl) URL.revokeObjectURL(previewScriptUrl);
+
+    previewStyleUrl = URL.createObjectURL(new Blob([viewerStyles], { type: "text/css" }));
+    previewScriptUrl = URL.createObjectURL(new Blob([viewerScript], { type: "text/javascript" }));
     const config = {
       panorama: panoramaObjectUrl,
       hotspots: collectHotspots()
     };
 
     const html = viewerIndex(title)
-      .replace('href="styles.css"', `href="${styleUrl}"`)
+      .replace('href="styles.css"', `href="${previewStyleUrl}"`)
       .replace(
         "<script src=\"app.js\"></script>",
         `<script>
@@ -234,12 +242,13 @@ window.fetch = function(resource, options) {
   return nativeFetch(resource, options);
 };
 </script>
-<script src="${scriptUrl}"></script>`
+<script src="${previewScriptUrl}"></script>`
       );
 
-    const previewUrl = URL.createObjectURL(new Blob([html], { type: "text/html" }));
-    window.open(previewUrl, "_blank", "noopener");
-    setStatus("Temporary preview opened with viewer controls.");
+    previewPageUrl = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+    viewerFrame.src = previewPageUrl;
+    viewerDropZone.classList.add("has-viewer");
+    setStatus("Viewer preview refreshed with client controls.");
   }
 
   function escapeHtml(value) {
@@ -401,6 +410,25 @@ window.fetch = function(resource, options) {
     event.preventDefault();
     dropZone.classList.remove("is-dragging");
     setPanoramaFile(event.dataTransfer.files[0]);
+  });
+  viewerDropZone.addEventListener("dragover", function (event) {
+    event.preventDefault();
+    viewerDropOverlay.classList.add("is-visible");
+  });
+  viewerDropZone.addEventListener("dragleave", function (event) {
+    if (!viewerDropZone.contains(event.relatedTarget)) {
+      viewerDropOverlay.classList.remove("is-visible");
+    }
+  });
+  viewerDropZone.addEventListener("drop", function (event) {
+    event.preventDefault();
+    viewerDropOverlay.classList.remove("is-visible");
+    setPanoramaFile(event.dataTransfer.files[0]);
+  });
+  fullscreenPreview.addEventListener("click", function () {
+    if (viewerDropZone.requestFullscreen) {
+      viewerDropZone.requestFullscreen().catch(function () {});
+    }
   });
   previewViewer.addEventListener("click", openTemporaryPreview);
   openLink.addEventListener("click", function () {

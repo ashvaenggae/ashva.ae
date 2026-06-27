@@ -8,7 +8,20 @@
   </head>
   <body>
     <main class="admin-shell">
-      <section class="workspace" aria-label="Create 3D viewer link">
+      <section id="viewerDropZone" class="viewer-workspace" aria-label="3D panorama preview">
+        <iframe id="viewerFrame" title="3D panorama preview"></iframe>
+        <div id="viewerEmpty" class="viewer-empty">
+          <div>
+            <p class="kicker">Ashva 3D Admin</p>
+            <h1>Drop a panorama</h1>
+            <p>Choose or drag a 360 image here to preview it with the same controls clients will use.</p>
+          </div>
+        </div>
+        <div id="viewerDropOverlay" class="viewer-drop-overlay">Drop panorama image</div>
+        <button id="fullscreenPreview" class="fullscreen-preview" type="button">Fullscreen</button>
+      </section>
+
+      <aside class="side-panel" aria-label="Create 3D viewer link">
         <header class="topbar">
           <div>
             <p class="kicker">Ashva 3D Admin</p>
@@ -16,7 +29,6 @@
           </div>
           <a class="site-link" href="/" target="_blank" rel="noopener">Website</a>
         </header>
-
         <section class="panel">
           <div class="section-title">
             <h2>Project</h2>
@@ -64,19 +76,9 @@
 
           <div id="hotspotRows" class="hotspot-rows"></div>
         </section>
-      </section>
-
-      <aside class="publish-panel" aria-label="Publish package">
-        <div class="preview-box">
-          <img id="previewImage" alt="">
-          <div id="previewEmpty">
-            <p class="kicker">Preview</p>
-            <p>Selected panorama appears here.</p>
-          </div>
-        </div>
 
         <div class="publish-actions">
-          <button id="previewViewer" type="button">Preview 3D Viewer</button>
+          <button id="previewViewer" type="button">Refresh Viewer</button>
           <button id="openLink" type="button">Create Client Link</button>
           <button id="downloadZip" type="button">Download Upload ZIP</button>
           <p id="statusText">Create a project, choose a panorama, then download the ready website folder.</p>
