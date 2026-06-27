@@ -404,19 +404,14 @@ window.fetch = function(resource, options) {
   });
   previewViewer.addEventListener("click", openTemporaryPreview);
   openLink.addEventListener("click", function () {
+    updateLink();
     if (shareLink.value) {
-      window.open(shareLink.value, "_blank", "noopener");
+      setStatus("Client link created. Copy it or download the upload ZIP to publish this view.");
     }
   });
   downloadZip.addEventListener("click", downloadPackage);
 
   projectName.value = "as005";
   viewPath.value = "room/view1";
-  addHotspotRow({
-    label: "Ashva website",
-    url: "https://www.ashva.ae/",
-    yaw: 18,
-    pitch: 0
-  });
   updateLink();
 }());
