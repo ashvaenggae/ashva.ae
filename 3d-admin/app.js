@@ -8,6 +8,7 @@
   const fileName = document.getElementById("fileName");
   const shareLink = document.getElementById("shareLink");
   const copyLink = document.getElementById("copyLink");
+  const githubToken = document.getElementById("githubToken");
   const addHotspot = document.getElementById("addHotspot");
   const hotspotRows = document.getElementById("hotspotRows");
   const viewerDropZone = document.getElementById("viewerDropZone");
@@ -62,6 +63,13 @@
   function updateLink() {
     const path = routePath();
     shareLink.value = path ? `${baseUrl}/${path}/` : "";
+  }
+
+  function embedUrl(url) {
+    if (!url) {
+      return "";
+    }
+    return `${url}${url.includes("?") ? "&" : "?"}embed=1`;
   }
 
   function setStatus(message) {
@@ -224,7 +232,7 @@
       return;
     }
     if (!file) {
-      viewerFrame.src = shareLink.value;
+      viewerFrame.src = embedUrl(shareLink.value);
       viewerDropZone.classList.add("has-viewer");
       setStatus("Loaded the generated client link in the viewer.");
       return;
@@ -250,6 +258,7 @@
 
     const html = viewerIndex(title)
       .replace('href="styles.css"', `href="${previewStyleUrl}"`)
+      .replace("<body>", '<body class="embed-mode">')
       .replace(
         "<script src=\"app.js\"></script>",
         `<script>
@@ -283,19 +292,18 @@ window.fetch = function(resource, options) {
       .replace(/"/g, "&quot;");
   }
 
-  async function downloadPackage() {
+  async function createViewerFiles() {
     const path = routePath();
     const file = selectedPanoramaFile || panoramaFile.files[0];
     if (!path) {
       setStatus("Enter project name and view path first.");
-      return;
+      return null;
     }
     if (!file) {
       setStatus("Choose a panorama image first.");
-      return;
+      return null;
     }
 
-    setStatus("Preparing viewer package...");
     const ext = imageExtension(file);
     const panoramaName = `panorama.${ext}`;
     const title = `${slugifyPath(projectName.value).toUpperCase()} ${slugifyPath(viewPath.value).replace(/\//g, " ")}`;
@@ -318,13 +326,108 @@ window.fetch = function(resource, options) {
       { name: `${path}/${panoramaName}`, data: imageBytes }
     ];
 
-    const zip = buildZip(files);
+    return { files, path };
+  }
+
+  async function downloadPackage() {
+    setStatus("Preparing viewer package...");
+    const packageData = await createViewerFiles();
+    if (!packageData) {
+      return;
+    }
+
+    const zip = buildZip(packageData.files);
     const link = document.createElement("a");
     link.href = URL.createObjectURL(new Blob([zip], { type: "application/zip" }));
     link.download = `${slugifyPath(projectName.value)}-${slugifyPath(viewPath.value).replace(/\//g, "-")}.zip`;
     link.click();
     URL.revokeObjectURL(link.href);
     setStatus("ZIP downloaded. Upload its 3dviewdesigns folder to GitHub to make the link live.");
+  }
+
+  function bytesToBase64(bytes) {
+    let binary = "";
+    const chunkSize = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+    }
+    return btoa(binary);
+  }
+
+  function contentToBase64(data) {
+    return bytesToBase64(toBytes(data));
+  }
+
+  async function existingFileSha(path, token) {
+    const response = await fetch(`https://api.github.com/repos/ashvaenggae/ashva.ae/contents/${encodeURIComponent(path).replace(/%2F/g, "/")}?ref=main`, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${token}`,
+        "X-GitHub-Api-Version": "2022-11-28"
+      }
+    });
+    if (response.status === 404) {
+      return null;
+    }
+    if (!response.ok) {
+      throw new Error(`Could not check ${path}: ${response.status}`);
+    }
+    return (await response.json()).sha;
+  }
+
+  async function uploadGithubFile(file, token, message) {
+    const sha = await existingFileSha(file.name, token);
+    const body = {
+      message,
+      content: contentToBase64(file.data),
+      branch: "main"
+    };
+    if (sha) {
+      body.sha = sha;
+    }
+
+    const response = await fetch(`https://api.github.com/repos/ashvaenggae/ashva.ae/contents/${encodeURIComponent(file.name).replace(/%2F/g, "/")}`, {
+      method: "PUT",
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "X-GitHub-Api-Version": "2022-11-28"
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error(`Upload failed for ${file.name}: ${response.status} ${detail}`);
+    }
+  }
+
+  async function publishClientLink() {
+    updateLink();
+    const token = githubToken.value.trim();
+    if (!token) {
+      setStatus("Paste a GitHub token first. It is used only for this publish and is not saved.");
+      githubToken.focus();
+      return;
+    }
+
+    const packageData = await createViewerFiles();
+    if (!packageData) {
+      return;
+    }
+
+    setStatus("Publishing files to GitHub...");
+    const message = `Publish 3D view ${packageData.path}`;
+    for (let index = 0; index < packageData.files.length; index += 1) {
+      const file = packageData.files[index];
+      setStatus(`Publishing ${index + 1}/${packageData.files.length}: ${file.name}`);
+      await uploadGithubFile(file, token, message);
+    }
+
+    await navigator.clipboard.writeText(shareLink.value).catch(function () {});
+    setStatus("Client link is live. Copied link and opening it in a new tab.");
+    window.open(shareLink.value, "_blank", "noopener");
   }
 
   function crc32(bytes) {
@@ -456,20 +559,15 @@ window.fetch = function(resource, options) {
   });
   previewViewer.addEventListener("click", openTemporaryPreview);
   openLink.addEventListener("click", function () {
-    updateLink();
-    if (shareLink.value) {
-      if (!selectedPanoramaFile) {
-        viewerFrame.src = shareLink.value;
-        viewerDropZone.classList.add("has-viewer");
-      }
-      setStatus("Client link created. Copy it or download the upload ZIP to publish this view.");
-    }
+    publishClientLink().catch(function (error) {
+      setStatus(error.message);
+    });
   });
   downloadZip.addEventListener("click", downloadPackage);
 
   projectName.value = "as005";
   viewPath.value = "room/view1";
   updateLink();
-  viewerFrame.src = shareLink.value;
+  viewerFrame.src = embedUrl(shareLink.value);
   viewerDropZone.classList.add("has-viewer");
 }());
