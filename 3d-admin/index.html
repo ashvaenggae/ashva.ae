@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ashva 3D Admin</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="admin-shell">
+      <section class="workspace" aria-label="Create 3D viewer link">
+        <header class="topbar">
+          <div>
+            <p class="kicker">Ashva 3D Admin</p>
+            <h1>Create Client Viewer</h1>
+          </div>
+          <a class="site-link" href="/" target="_blank" rel="noopener">Website</a>
+        </header>
+
+        <section class="panel">
+          <div class="section-title">
+            <h2>Project</h2>
+            <span>1</span>
+          </div>
+
+          <div class="form-grid">
+            <label>
+              Project name
+              <input id="projectName" type="text" placeholder="as005" autocomplete="off">
+            </label>
+            <label>
+              View path
+              <input id="viewPath" type="text" placeholder="room/view1" autocomplete="off">
+            </label>
+          </div>
+
+          <label class="upload-card" for="panoramaFile">
+            <input id="panoramaFile" type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml">
+            <span class="upload-mark">+</span>
+            <span>
+              <strong id="fileName">Choose panorama image</strong>
+              <small>Use an equirectangular JPG, PNG, WebP, or SVG</small>
+            </span>
+          </label>
+        </section>
+
+        <section class="panel">
+          <div class="section-title">
+            <h2>Client Link</h2>
+            <span>2</span>
+          </div>
+
+          <div class="copy-row">
+            <input id="shareLink" type="text" readonly>
+            <button id="copyLink" type="button">Copy</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="section-title">
+            <h2>Hotspots</h2>
+            <button id="addHotspot" type="button">Add link</button>
+          </div>
+
+          <div id="hotspotRows" class="hotspot-rows"></div>
+        </section>
+      </section>
+
+      <aside class="publish-panel" aria-label="Publish package">
+        <div class="preview-box">
+          <img id="previewImage" alt="">
+          <div id="previewEmpty">
+            <p class="kicker">Preview</p>
+            <p>Selected panorama appears here.</p>
+          </div>
+        </div>
+
+        <div class="publish-actions">
+          <button id="downloadZip" type="button">Download Upload ZIP</button>
+          <p id="statusText">Create a project, choose a panorama, then download the ready website folder.</p>
+        </div>
+
+        <div class="notes">
+          <p><strong>How it goes live</strong></p>
+          <p>Download the ZIP, extract it, then upload or push the generated `3dviewdesigns` folder to the `ashva.ae` GitHub repository.</p>
+        </div>
+      </aside>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
