@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="1024" viewBox="0 0 2048 1024">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2577b8"/>
+      <stop offset="0.45" stop-color="#9ad7ff"/>
+      <stop offset="0.5" stop-color="#d8bd77"/>
+      <stop offset="1" stop-color="#466b3a"/>
+    </linearGradient>
+  </defs>
+  <rect width="2048" height="1024" fill="url(#sky)"/>
+  <g fill="none" stroke="rgba(255,255,255,0.34)" stroke-width="3">
+    <path d="M0 512 H2048"/>
+    <path d="M1024 0 V1024"/>
+    <path d="M0 260 C460 155 840 155 1024 260 C1210 365 1590 365 2048 260"/>
+    <path d="M0 750 C460 650 840 650 1024 750 C1210 850 1590 850 2048 750"/>
+  </g>
+  <g fill="rgba(255,255,255,0.75)">
+    <ellipse cx="220" cy="190" rx="95" ry="28"/>
+    <ellipse cx="310" cy="180" rx="72" ry="22"/>
+    <ellipse cx="1280" cy="220" rx="110" ry="30"/>
+    <ellipse cx="1390" cy="205" rx="78" ry="24"/>
+  </g>
+  <text x="820" y="520" font-family="Arial, sans-serif" font-size="74" font-weight="700" fill="#17120a">AS005 Room View 1</text>
+  <text x="830" y="585" font-family="Arial, sans-serif" font-size="38" fill="#17120a">Local shared-link test panorama</text>
+</svg>

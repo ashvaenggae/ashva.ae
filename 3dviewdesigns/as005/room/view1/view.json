@@ -1,0 +1,11 @@
+{
+  "panorama": "panorama.svg",
+  "hotspots": [
+    {
+      "label": "Ashva website",
+      "url": "https://www.ashva.ae/",
+      "yaw": 18,
+      "pitch": 0
+    }
+  ]
+}
