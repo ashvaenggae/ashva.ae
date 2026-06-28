@@ -22,6 +22,7 @@
   const copyLink = document.getElementById("copyLink");
   const hotspotList = document.getElementById("hotspotList");
   const exitFullscreen = document.getElementById("exitFullscreen");
+  const fullscreenReset = document.getElementById("fullscreenReset");
   const recentImages = document.getElementById("recentImages");
   const recentImageList = document.getElementById("recentImageList");
   const viewerPanel = document.querySelector(".viewer-panel");
@@ -888,6 +889,13 @@
   cardboardBtn.addEventListener("click", enterCardboard);
   exitFullscreen.addEventListener("click", exitFullscreenView);
   resetView.addEventListener("click", resetCamera);
+  if (fullscreenReset) {
+    fullscreenReset.addEventListener("click", function (event) {
+      event.stopPropagation();
+      resetCamera();
+      showFullscreenZoom();
+    });
+  }
 
   addHotspot.addEventListener("click", function () {
     const label = hotspotLabel.value.trim() || "Link";
@@ -960,6 +968,9 @@
   document.addEventListener("fullscreenchange", function () {
     const isViewerFullscreen = document.fullscreenElement === viewerPanel;
     exitFullscreen.classList.toggle("hidden", !isViewerFullscreen);
+    if (fullscreenReset) {
+      fullscreenReset.classList.toggle("hidden", !isViewerFullscreen);
+    }
     viewerPanel.classList.toggle("is-fullscreen", isViewerFullscreen);
     if (fullscreenZoom) {
       fullscreenZoom.classList.remove("visible");
