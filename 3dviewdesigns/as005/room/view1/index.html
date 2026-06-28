@@ -4,12 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>360 View</title>
-    <link rel="stylesheet" href="styles.css?v=20260628-4">
+    <link rel="stylesheet" href="styles.css?v=20260628-5">
   </head>
   <body>
     <main class="app-shell">
       <section class="viewer-panel" aria-label="360 panorama viewer">
         <canvas id="viewer" aria-label="Interactive 360 panorama canvas"></canvas>
+        <img id="viewerWatermark" class="viewer-watermark hidden" src="/assets/images/logo-mark.png" alt="">
 
         <div id="emptyState" class="empty-state">
           <div class="loading-brand">
@@ -112,6 +113,6 @@
       </aside>
     </main>
 
-    <script src="app.js?v=20260628-4"></script>
+    <script src="app.js?v=20260628-5"></script>
   </body>
 </html>

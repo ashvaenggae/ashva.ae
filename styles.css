@@ -73,6 +73,18 @@ button:hover {
   cursor: grabbing;
 }
 
+.viewer-watermark {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 4;
+  width: clamp(50px, 7.2vw, 90px);
+  height: auto;
+  opacity: 0.78;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.38));
+}
+
 .empty-state,
 .drop-overlay {
   position: absolute;

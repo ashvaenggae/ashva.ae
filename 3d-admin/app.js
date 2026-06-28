@@ -183,12 +183,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>360 View</title>
-    <link rel="stylesheet" href="styles.css?v=20260628-4">
+    <link rel="stylesheet" href="styles.css?v=20260628-5">
   </head>
   <body>
     <main class="app-shell">
       <section class="viewer-panel" aria-label="360 panorama viewer">
         <canvas id="viewer" aria-label="Interactive 360 panorama canvas"></canvas>
+        <img id="viewerWatermark" class="viewer-watermark hidden" src="/assets/images/logo-mark.png" alt="">
         <div id="emptyState" class="empty-state">
           <div class="loading-brand">
             <img class="ashva-logo-mark" src="/assets/images/logo-mark.png" alt="">
@@ -246,7 +247,7 @@
         </div>
       </aside>
     </main>
-    <script src="app.js?v=20260628-4"></script>
+    <script src="app.js?v=20260628-5"></script>
   </body>
 </html>
 `;
@@ -269,8 +270,8 @@
     setStatus("Refreshing temporary 3D preview...");
     const title = `${slugifyPath(projectName.value).toUpperCase()} ${slugifyPath(viewPath.value).replace(/\//g, " ")}`;
     const [viewerScript, viewerStyles] = await Promise.all([
-      fetch("../3dviewdesigns/as005/room/view1/app.js?v=20260628-4").then((response) => response.text()),
-      fetch("../3dviewdesigns/as005/room/view1/styles.css?v=20260628-4").then((response) => response.text())
+      fetch("../3dviewdesigns/as005/room/view1/app.js?v=20260628-5").then((response) => response.text()),
+      fetch("../3dviewdesigns/as005/room/view1/styles.css?v=20260628-5").then((response) => response.text())
     ]);
 
     if (previewPageUrl) URL.revokeObjectURL(previewPageUrl);
@@ -341,8 +342,8 @@ window.fetch = function(resource, options) {
     }, null, 2);
 
     const [viewerScript, viewerStyles, imageBytes] = await Promise.all([
-      fetch("../3dviewdesigns/as005/room/view1/app.js?v=20260628-4").then((response) => response.text()),
-      fetch("../3dviewdesigns/as005/room/view1/styles.css?v=20260628-4").then((response) => response.text()),
+      fetch("../3dviewdesigns/as005/room/view1/app.js?v=20260628-5").then((response) => response.text()),
+      fetch("../3dviewdesigns/as005/room/view1/styles.css?v=20260628-5").then((response) => response.text()),
       file.arrayBuffer()
     ]);
 

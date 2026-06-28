@@ -2,6 +2,7 @@
   "use strict";
 
   const canvas = document.getElementById("viewer");
+  const viewerWatermark = document.getElementById("viewerWatermark");
   const emptyState = document.getElementById("emptyState");
   const dropOverlay = document.getElementById("dropOverlay");
   const imageInput = document.getElementById("imageInput");
@@ -477,6 +478,9 @@
 
     state.texture = texture;
     state.textureReady = true;
+    if (viewerWatermark) {
+      viewerWatermark.classList.remove("hidden");
+    }
   }
 
   function clamp(value, min, max) {
