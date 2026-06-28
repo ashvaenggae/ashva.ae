@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>360 View</title>
-    <link rel="stylesheet" href="styles.css?v=20260628-10">
+    <link rel="stylesheet" href="styles.css?v=20260628-11">
   </head>
   <body>
     <main class="app-shell">
@@ -27,6 +27,10 @@
         <button id="exitFullscreen" class="exit-fullscreen hidden" type="button" title="Exit fullscreen" aria-label="Exit fullscreen">
           ×
         </button>
+        <div id="fullscreenZoom" class="fullscreen-zoom" aria-label="Fullscreen zoom">
+          <span>Zoom</span>
+          <input id="fullscreenFovRange" type="range" min="35" max="95" value="70">
+        </div>
       </section>
 
       <aside class="tool-panel" aria-label="Viewer controls">
@@ -113,6 +117,6 @@
       </aside>
     </main>
 
-    <script src="app.js?v=20260628-10"></script>
+    <script src="app.js?v=20260628-11"></script>
   </body>
 </html>

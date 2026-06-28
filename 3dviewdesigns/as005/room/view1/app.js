@@ -12,6 +12,8 @@
   const motionBtn = document.getElementById("motionBtn");
   const resetView = document.getElementById("resetView");
   const fovRange = document.getElementById("fovRange");
+  const fullscreenZoom = document.getElementById("fullscreenZoom");
+  const fullscreenFovRange = document.getElementById("fullscreenFovRange");
   const stereoRange = document.getElementById("stereoRange");
   const addHotspot = document.getElementById("addHotspot");
   const projectName = document.getElementById("projectName");
@@ -29,7 +31,7 @@
   const editorMode = isLocalViewer && (pageParams.get("edit") === "1" || pageParams.get("admin") === "1");
   const embedMode = pageParams.get("embed") === "1";
   const recentMetaKey = "ashva3dRecentImages";
-  const motionPitchLimit = 60;
+  const motionPitchLimit = 100;
   const motionYawFreezePitch = 52;
 
   document.body.classList.toggle("editor-mode", editorMode);
@@ -606,6 +608,27 @@
     state.lastMotionYaw = null;
   }
 
+  function setFov(value) {
+    state.fov = clamp(Number(value), 35, 95);
+    fovRange.value = String(state.fov);
+    if (fullscreenFovRange) {
+      fullscreenFovRange.value = String(state.fov);
+    }
+  }
+
+  let fullscreenZoomTimer = 0;
+  function showFullscreenZoom() {
+    if (!fullscreenZoom || document.fullscreenElement !== viewerPanel) {
+      return;
+    }
+
+    fullscreenZoom.classList.add("visible");
+    window.clearTimeout(fullscreenZoomTimer);
+    fullscreenZoomTimer = window.setTimeout(function () {
+      fullscreenZoom.classList.remove("visible");
+    }, 2400);
+  }
+
   function currentScreenAngle() {
     const orientation = window.screen && window.screen.orientation;
     const angle = orientation && typeof orientation.angle === "number" ? orientation.angle : window.orientation;
@@ -815,8 +838,8 @@
 
   canvas.addEventListener("wheel", function (event) {
     event.preventDefault();
-    state.fov = clamp(state.fov + Math.sign(event.deltaY) * 4, 35, 95);
-    fovRange.value = String(state.fov);
+    setFov(state.fov + Math.sign(event.deltaY) * 4);
+    showFullscreenZoom();
   }, { passive: false });
 
   document.addEventListener("dragover", function (event) {
@@ -837,8 +860,24 @@
   });
 
   fovRange.addEventListener("input", function () {
-    state.fov = Number(fovRange.value);
+    setFov(fovRange.value);
   });
+
+  if (fullscreenFovRange) {
+    fullscreenFovRange.addEventListener("input", function () {
+      setFov(fullscreenFovRange.value);
+      showFullscreenZoom();
+    });
+  }
+
+  if (fullscreenZoom) {
+    fullscreenZoom.addEventListener("pointerdown", function (event) {
+      event.stopPropagation();
+      showFullscreenZoom();
+    });
+  }
+
+  viewerPanel.addEventListener("pointerdown", showFullscreenZoom);
 
   stereoRange.addEventListener("input", function () {
     state.stereoOffset = Number(stereoRange.value);
@@ -921,6 +960,14 @@
   document.addEventListener("fullscreenchange", function () {
     const isViewerFullscreen = document.fullscreenElement === viewerPanel;
     exitFullscreen.classList.toggle("hidden", !isViewerFullscreen);
+    viewerPanel.classList.toggle("is-fullscreen", isViewerFullscreen);
+    if (fullscreenZoom) {
+      fullscreenZoom.classList.remove("visible");
+    }
+    window.clearTimeout(fullscreenZoomTimer);
+    if (isViewerFullscreen) {
+      showFullscreenZoom();
+    }
 
     if (!document.fullscreenElement && isCardboardActive()) {
       modeSelect.value = "mono";
