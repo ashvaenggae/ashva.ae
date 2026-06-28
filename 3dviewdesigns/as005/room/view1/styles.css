@@ -75,8 +75,8 @@ button:hover {
 
 .viewer-watermark {
   position: absolute;
-  top: 18px;
   right: 18px;
+  bottom: 18px;
   z-index: 4;
   width: clamp(50px, 7.2vw, 90px);
   height: auto;
@@ -441,7 +441,6 @@ input[type="range"] {
   display: none !important;
 }
 
-body.viewer-mode .upload-zone,
 body.viewer-mode .hotspot-editor {
   display: none;
 }
@@ -485,5 +484,13 @@ body.cardboard-active .empty-state {
   .tool-panel {
     border-left: 0;
     border-top: 1px solid var(--line);
+    width: 100%;
+    max-width: none;
+  }
+
+  .viewer-watermark {
+    right: 14px;
+    bottom: 14px;
+    width: 58px;
   }
 }

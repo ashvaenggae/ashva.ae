@@ -173,8 +173,15 @@
     }
 
     const items = readRecentMeta().slice(0, 3);
-    recentImages.classList.toggle("hidden", items.length === 0);
+    recentImages.classList.remove("hidden");
     recentImageList.innerHTML = "";
+
+    if (!items.length) {
+      const empty = document.createElement("small");
+      empty.textContent = "No recent images yet.";
+      recentImageList.appendChild(empty);
+      return;
+    }
 
     items.forEach(function (item) {
       const button = document.createElement("button");
