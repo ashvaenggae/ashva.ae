@@ -717,9 +717,7 @@
       }
     } catch (error) {}
 
-    if (!imageFromUrl) {
-      loadImageUrl("panorama.jpg", "panorama.jpg");
-    }
+    emptyState.classList.remove("hidden");
   }
 
   imageInput.addEventListener("change", function () {
