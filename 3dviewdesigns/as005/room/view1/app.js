@@ -55,6 +55,8 @@
     motionEnabled: false,
     baseMotionYaw: null,
     baseMotionPitch: null,
+    baseMotionGamma: null,
+    baseScreenAngle: 0,
     hotspots: []
   };
 
@@ -596,6 +598,33 @@
     state.pitch = 0;
     state.baseMotionYaw = null;
     state.baseMotionPitch = null;
+    state.baseMotionGamma = null;
+    state.baseScreenAngle = currentScreenAngle();
+  }
+
+  function currentScreenAngle() {
+    const orientation = window.screen && window.screen.orientation;
+    const angle = orientation && typeof orientation.angle === "number" ? orientation.angle : window.orientation;
+    return Number(angle) || 0;
+  }
+
+  function normalizedScreenAngle() {
+    return ((currentScreenAngle() % 360) + 360) % 360;
+  }
+
+  function motionPitch(event) {
+    const angle = normalizedScreenAngle();
+
+    if ((angle === 90 || angle === 270) && event.gamma !== null && state.baseMotionGamma !== null) {
+      const gammaDelta = event.gamma - state.baseMotionGamma;
+      return angle === 90 ? -gammaDelta : gammaDelta;
+    }
+
+    if (event.beta !== null && state.baseMotionPitch !== null) {
+      return event.beta - state.baseMotionPitch;
+    }
+
+    return 0;
   }
 
   function updateModeClass() {
@@ -848,20 +877,24 @@
     motionBtn.textContent = state.motionEnabled ? "Motion On" : "Motion";
     state.baseMotionYaw = null;
     state.baseMotionPitch = null;
+    state.baseMotionGamma = null;
+    state.baseScreenAngle = currentScreenAngle();
   });
 
   window.addEventListener("deviceorientation", function (event) {
-    if (!state.motionEnabled || event.alpha === null || event.beta === null) {
+    if (!state.motionEnabled || event.alpha === null || (event.beta === null && event.gamma === null)) {
       return;
     }
 
     if (state.baseMotionYaw === null) {
       state.baseMotionYaw = event.alpha;
       state.baseMotionPitch = event.beta;
+      state.baseMotionGamma = event.gamma;
+      state.baseScreenAngle = currentScreenAngle();
     }
 
     state.yaw = normalizeYaw(event.alpha - state.baseMotionYaw);
-    state.pitch = clamp(event.beta - state.baseMotionPitch, -85, 85);
+    state.pitch = clamp(motionPitch(event), -85, 85);
   });
 
   document.addEventListener("fullscreenchange", function () {
