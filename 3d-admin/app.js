@@ -182,8 +182,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>${escapeHtml(title)}</title>
-    <link rel="stylesheet" href="styles.css?v=20260627-2">
+    <title>360 View</title>
+    <link rel="stylesheet" href="styles.css?v=20260628-1">
   </head>
   <body>
     <main class="app-shell">
@@ -202,8 +202,8 @@
       <aside class="tool-panel" aria-label="Viewer controls">
         <div class="brand-row">
           <div>
-            <p class="kicker">Ashva 3D View</p>
-            <h2>${escapeHtml(title)}</h2>
+            <p class="kicker">ASHVA 3D VIEWER</p>
+            <h2>360 View</h2>
           </div>
           <button id="resetView" class="icon-button" type="button" title="Reset view" aria-label="Reset view"><span aria-hidden="true">↺</span></button>
         </div>
@@ -212,6 +212,10 @@
           <span class="upload-icon" aria-hidden="true">+</span>
           <span><strong>Choose panorama</strong><small>JPG, PNG, or WebP</small></span>
         </label>
+        <section id="recentImages" class="recent-images hidden" aria-label="Recent images">
+          <h3>Recent images</h3>
+          <div id="recentImageList" class="recent-list"></div>
+        </section>
         <div class="control-group">
           <label for="modeSelect">View mode</label>
           <select id="modeSelect">
@@ -242,7 +246,7 @@
         </div>
       </aside>
     </main>
-    <script src="app.js?v=20260627-2"></script>
+    <script src="app.js?v=20260628-1"></script>
   </body>
 </html>
 `;
@@ -265,8 +269,8 @@
     setStatus("Refreshing temporary 3D preview...");
     const title = `${slugifyPath(projectName.value).toUpperCase()} ${slugifyPath(viewPath.value).replace(/\//g, " ")}`;
     const [viewerScript, viewerStyles] = await Promise.all([
-      fetch("../3dviewdesigns/as005/room/view1/app.js?v=20260627-2").then((response) => response.text()),
-      fetch("../3dviewdesigns/as005/room/view1/styles.css?v=20260627-2").then((response) => response.text())
+      fetch("../3dviewdesigns/as005/room/view1/app.js?v=20260628-1").then((response) => response.text()),
+      fetch("../3dviewdesigns/as005/room/view1/styles.css?v=20260628-1").then((response) => response.text())
     ]);
 
     if (previewPageUrl) URL.revokeObjectURL(previewPageUrl);
@@ -337,8 +341,8 @@ window.fetch = function(resource, options) {
     }, null, 2);
 
     const [viewerScript, viewerStyles, imageBytes] = await Promise.all([
-      fetch("../3dviewdesigns/as005/room/view1/app.js?v=20260627-2").then((response) => response.text()),
-      fetch("../3dviewdesigns/as005/room/view1/styles.css?v=20260627-2").then((response) => response.text()),
+      fetch("../3dviewdesigns/as005/room/view1/app.js?v=20260628-1").then((response) => response.text()),
+      fetch("../3dviewdesigns/as005/room/view1/styles.css?v=20260628-1").then((response) => response.text()),
       file.arrayBuffer()
     ]);
 

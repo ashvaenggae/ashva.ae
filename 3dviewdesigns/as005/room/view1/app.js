@@ -19,12 +19,15 @@
   const copyLink = document.getElementById("copyLink");
   const hotspotList = document.getElementById("hotspotList");
   const exitFullscreen = document.getElementById("exitFullscreen");
+  const recentImages = document.getElementById("recentImages");
+  const recentImageList = document.getElementById("recentImageList");
   const viewerPanel = document.querySelector(".viewer-panel");
   const pageParams = new URLSearchParams(window.location.search);
   const localHostnames = ["localhost", "127.0.0.1", ""];
   const isLocalViewer = window.location.protocol === "file:" || localHostnames.includes(window.location.hostname);
   const editorMode = isLocalViewer && (pageParams.get("edit") === "1" || pageParams.get("admin") === "1");
   const embedMode = pageParams.get("embed") === "1";
+  const recentMetaKey = "ashva3dRecentImages";
 
   document.body.classList.toggle("editor-mode", editorMode);
   document.body.classList.toggle("viewer-mode", !editorMode);
@@ -53,6 +56,144 @@
     baseMotionPitch: null,
     hotspots: []
   };
+
+  function fileBaseName(value) {
+    const clean = String(value || "").split("?")[0].split("#")[0];
+    const parts = clean.split("/");
+    return decodeURIComponent(parts[parts.length - 1] || "Panorama image");
+  }
+
+  function readRecentMeta() {
+    try {
+      return JSON.parse(localStorage.getItem(recentMetaKey) || "[]");
+    } catch (error) {
+      return [];
+    }
+  }
+
+  function writeRecentMeta(items) {
+    try {
+      localStorage.setItem(recentMetaKey, JSON.stringify(items.slice(0, 3)));
+    } catch (error) {}
+  }
+
+  function openRecentDb() {
+    return new Promise(function (resolve, reject) {
+      const request = indexedDB.open("ashva3dViewer", 1);
+      request.onupgradeneeded = function () {
+        request.result.createObjectStore("images");
+      };
+      request.onsuccess = function () {
+        resolve(request.result);
+      };
+      request.onerror = function () {
+        reject(request.error);
+      };
+    });
+  }
+
+  async function saveRecentBlob(id, blob) {
+    const db = await openRecentDb();
+    await new Promise(function (resolve, reject) {
+      const tx = db.transaction("images", "readwrite");
+      tx.objectStore("images").put(blob, id);
+      tx.oncomplete = resolve;
+      tx.onerror = function () {
+        reject(tx.error);
+      };
+    });
+    db.close();
+  }
+
+  async function getRecentBlob(id) {
+    const db = await openRecentDb();
+    const blob = await new Promise(function (resolve, reject) {
+      const tx = db.transaction("images", "readonly");
+      const request = tx.objectStore("images").get(id);
+      request.onsuccess = function () {
+        resolve(request.result);
+      };
+      request.onerror = function () {
+        reject(request.error);
+      };
+    });
+    db.close();
+    return blob;
+  }
+
+  async function removeRecentBlob(id) {
+    const db = await openRecentDb();
+    await new Promise(function (resolve) {
+      const tx = db.transaction("images", "readwrite");
+      tx.objectStore("images").delete(id);
+      tx.oncomplete = resolve;
+      tx.onerror = resolve;
+    });
+    db.close();
+  }
+
+  function rememberRecentUrl(name, url) {
+    if (!url || url.startsWith("data:") || url.startsWith("blob:")) {
+      return;
+    }
+    const existing = readRecentMeta();
+    const next = [
+      { id: `url:${url}`, kind: "url", name: name || fileBaseName(url), url },
+      ...existing.filter((item) => item.url !== url)
+    ].slice(0, 3);
+    writeRecentMeta(next);
+    renderRecentImages();
+  }
+
+  async function rememberRecentFile(file) {
+    if (!file) {
+      return;
+    }
+    const id = `file:${file.name}:${file.lastModified}:${file.size}`;
+    try {
+      await saveRecentBlob(id, file);
+      const existing = readRecentMeta();
+      const next = [
+        { id, kind: "file", name: file.name },
+        ...existing.filter((item) => item.id !== id)
+      ].slice(0, 3);
+      const removed = existing.filter((item) => item.kind === "file" && !next.some((nextItem) => nextItem.id === item.id));
+      writeRecentMeta(next);
+      removed.forEach(function (item) {
+        removeRecentBlob(item.id);
+      });
+      renderRecentImages();
+    } catch (error) {}
+  }
+
+  function renderRecentImages() {
+    if (!recentImages || !recentImageList) {
+      return;
+    }
+
+    const items = readRecentMeta().slice(0, 3);
+    recentImages.classList.toggle("hidden", items.length === 0);
+    recentImageList.innerHTML = "";
+
+    items.forEach(function (item) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = item.name || "Panorama image";
+      button.title = item.name || "Panorama image";
+      button.addEventListener("click", async function () {
+        if (item.kind === "url") {
+          loadImageUrl(item.url, item.name);
+          return;
+        }
+
+        const blob = await getRecentBlob(item.id);
+        if (blob) {
+          loadImageBlob(blob);
+        }
+      });
+      recentImageList.appendChild(button);
+    });
+  }
 
   const program = createProgram(gl, vertexShaderSource(), fragmentShaderSource());
   const attributes = {
@@ -293,15 +434,28 @@
       setTexture(image);
       URL.revokeObjectURL(url);
       emptyState.classList.add("hidden");
+      rememberRecentFile(file);
     };
     image.src = url;
   }
 
-  function loadImageUrl(url) {
+  function loadImageBlob(blob) {
+    const url = URL.createObjectURL(blob);
+    const image = new Image();
+    image.onload = function () {
+      setTexture(image);
+      URL.revokeObjectURL(url);
+      emptyState.classList.add("hidden");
+    };
+    image.src = url;
+  }
+
+  function loadImageUrl(url, recentName) {
     const image = new Image();
     image.onload = function () {
       setTexture(image);
       emptyState.classList.add("hidden");
+      rememberRecentUrl(recentName || fileBaseName(url), url);
     };
     image.onerror = function () {};
     image.src = url;
@@ -548,7 +702,7 @@
   async function loadHostedView() {
     const imageFromUrl = pageParams.get("image");
     if (imageFromUrl) {
-      loadImageUrl(imageFromUrl);
+      loadImageUrl(imageFromUrl, fileBaseName(imageFromUrl));
     }
 
     try {
@@ -556,7 +710,7 @@
       if (response.ok) {
         const config = await response.json();
         if (!imageFromUrl && config.panorama) {
-          loadImageUrl(config.panorama);
+          loadImageUrl(config.panorama, fileBaseName(config.panorama));
         }
         addHostedHotspots(config.hotspots);
         return;
@@ -564,7 +718,7 @@
     } catch (error) {}
 
     if (!imageFromUrl) {
-      loadImageUrl("panorama.jpg");
+      loadImageUrl("panorama.jpg", "panorama.jpg");
     }
   }
 
@@ -714,6 +868,7 @@
   window.addEventListener("resize", resizeCanvas);
 
   renderHotspotList();
+  renderRecentImages();
   loadHostedView();
   requestAnimationFrame(draw);
 }());
