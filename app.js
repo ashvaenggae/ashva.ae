@@ -893,8 +893,8 @@
       state.baseScreenAngle = currentScreenAngle();
     }
 
-    state.yaw = normalizeYaw(event.alpha - state.baseMotionYaw);
-    state.pitch = clamp(motionPitch(event), -85, 85);
+    state.yaw = normalizeYaw(state.baseMotionYaw - event.alpha);
+    state.pitch = clamp(-motionPitch(event), -85, 85);
   });
 
   document.addEventListener("fullscreenchange", function () {
