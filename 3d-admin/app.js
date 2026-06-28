@@ -183,7 +183,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>360 View</title>
-    <link rel="stylesheet" href="styles.css?v=20260628-1">
+    <link rel="stylesheet" href="styles.css?v=20260628-2">
   </head>
   <body>
     <main class="app-shell">
@@ -246,7 +246,7 @@
         </div>
       </aside>
     </main>
-    <script src="app.js?v=20260628-1"></script>
+    <script src="app.js?v=20260628-2"></script>
   </body>
 </html>
 `;
@@ -269,8 +269,8 @@
     setStatus("Refreshing temporary 3D preview...");
     const title = `${slugifyPath(projectName.value).toUpperCase()} ${slugifyPath(viewPath.value).replace(/\//g, " ")}`;
     const [viewerScript, viewerStyles] = await Promise.all([
-      fetch("../3dviewdesigns/as005/room/view1/app.js?v=20260628-1").then((response) => response.text()),
-      fetch("../3dviewdesigns/as005/room/view1/styles.css?v=20260628-1").then((response) => response.text())
+      fetch("../3dviewdesigns/as005/room/view1/app.js?v=20260628-2").then((response) => response.text()),
+      fetch("../3dviewdesigns/as005/room/view1/styles.css?v=20260628-2").then((response) => response.text())
     ]);
 
     if (previewPageUrl) URL.revokeObjectURL(previewPageUrl);
@@ -341,8 +341,8 @@ window.fetch = function(resource, options) {
     }, null, 2);
 
     const [viewerScript, viewerStyles, imageBytes] = await Promise.all([
-      fetch("../3dviewdesigns/as005/room/view1/app.js?v=20260628-1").then((response) => response.text()),
-      fetch("../3dviewdesigns/as005/room/view1/styles.css?v=20260628-1").then((response) => response.text()),
+      fetch("../3dviewdesigns/as005/room/view1/app.js?v=20260628-2").then((response) => response.text()),
+      fetch("../3dviewdesigns/as005/room/view1/styles.css?v=20260628-2").then((response) => response.text()),
       file.arrayBuffer()
     ]);
 
