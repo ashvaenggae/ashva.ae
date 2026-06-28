@@ -32,8 +32,8 @@
   const editorMode = isLocalViewer && (pageParams.get("edit") === "1" || pageParams.get("admin") === "1");
   const embedMode = pageParams.get("embed") === "1";
   const recentMetaKey = "ashva3dRecentImages";
-  const motionPitchLimit = 100;
-  const motionYawFreezePitch = 52;
+  const motionPitchLimit = 85;
+  const motionYawFreezePitch = 82;
 
   document.body.classList.toggle("editor-mode", editorMode);
   document.body.classList.toggle("viewer-mode", !editorMode);
@@ -506,6 +506,10 @@
     return degrees * Math.PI / 180;
   }
 
+  function radToDeg(radians) {
+    return radians * 180 / Math.PI;
+  }
+
   function normalizeYaw(degrees) {
     return ((degrees % 360) + 360) % 360;
   }
@@ -640,27 +644,67 @@
     return ((currentScreenAngle() % 360) + 360) % 360;
   }
 
-  function motionPitch(event) {
-    const angle = normalizedScreenAngle();
-
-    if ((angle === 90 || angle === 270) && event.gamma !== null && state.baseMotionGamma !== null) {
-      const gammaDelta = event.gamma - state.baseMotionGamma;
-      return angle === 90 ? -gammaDelta : gammaDelta;
-    }
-
-    if (event.beta !== null && state.baseMotionPitch !== null) {
-      return event.beta - state.baseMotionPitch;
-    }
-
-    return 0;
+  function multiplyQuaternion(a, b) {
+    return {
+      x: a.x * b.w + a.w * b.x + a.y * b.z - a.z * b.y,
+      y: a.y * b.w + a.w * b.y + a.z * b.x - a.x * b.z,
+      z: a.z * b.w + a.w * b.z + a.x * b.y - a.y * b.x,
+      w: a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z
+    };
   }
 
-  function motionYaw(event, pitch) {
-    const nextYaw = normalizeYaw(angleDelta(state.baseMotionYaw, event.alpha));
+  function axisAngleQuaternion(x, y, z, angle) {
+    const half = angle / 2;
+    const s = Math.sin(half);
+    return { x: x * s, y: y * s, z: z * s, w: Math.cos(half) };
+  }
+
+  function deviceQuaternion(alpha, beta, gamma, screenAngle) {
+    const x = degToRad(beta || 0);
+    const y = degToRad(alpha || 0);
+    const z = degToRad(-(gamma || 0));
+    const c1 = Math.cos(x / 2);
+    const c2 = Math.cos(y / 2);
+    const c3 = Math.cos(z / 2);
+    const s1 = Math.sin(x / 2);
+    const s2 = Math.sin(y / 2);
+    const s3 = Math.sin(z / 2);
+
+    let q = {
+      x: s1 * c2 * c3 + c1 * s2 * s3,
+      y: c1 * s2 * c3 - s1 * c2 * s3,
+      z: c1 * c2 * s3 - s1 * s2 * c3,
+      w: c1 * c2 * c3 + s1 * s2 * s3
+    };
+
+    q = multiplyQuaternion(q, axisAngleQuaternion(1, 0, 0, -Math.PI / 2));
+    return multiplyQuaternion(q, axisAngleQuaternion(0, 0, 1, -degToRad(screenAngle)));
+  }
+
+  function rotateForward(q) {
+    return {
+      x: -2 * (q.x * q.z + q.w * q.y),
+      y: -2 * (q.y * q.z - q.w * q.x),
+      z: -(1 - 2 * (q.x * q.x + q.y * q.y))
+    };
+  }
+
+  function motionAngles(event) {
+    const forward = rotateForward(deviceQuaternion(event.alpha, event.beta, event.gamma, currentScreenAngle()));
+    return {
+      yaw: normalizeYaw(radToDeg(Math.atan2(forward.x, -forward.z))),
+      pitch: radToDeg(Math.asin(clamp(forward.y, -1, 1)))
+    };
+  }
+
+  function stableMotionYaw(nextYaw, pitch) {
+    if (state.lastMotionYaw !== null && Math.abs(pitch) >= motionYawFreezePitch) {
+      return state.lastMotionYaw;
+    }
 
     if (state.lastMotionYaw !== null) {
       const yawJump = Math.abs(angleDelta(nextYaw, state.lastMotionYaw));
-      if (Math.abs(pitch) >= motionYawFreezePitch || yawJump > 110) {
+      if (yawJump > 110) {
         return state.lastMotionYaw;
       }
     }
@@ -952,16 +996,19 @@
       return;
     }
 
+    const angles = motionAngles(event);
+
     if (state.baseMotionYaw === null) {
-      state.baseMotionYaw = event.alpha;
-      state.baseMotionPitch = event.beta;
+      state.baseMotionYaw = angles.yaw;
+      state.baseMotionPitch = angles.pitch;
       state.baseMotionGamma = event.gamma;
       state.baseScreenAngle = currentScreenAngle();
       state.lastMotionYaw = null;
     }
 
-    const nextPitch = clamp(-motionPitch(event), -motionPitchLimit, motionPitchLimit);
-    state.yaw = motionYaw(event, nextPitch);
+    const nextPitch = clamp(angles.pitch - state.baseMotionPitch, -motionPitchLimit, motionPitchLimit);
+    const nextYaw = normalizeYaw(angleDelta(state.baseMotionYaw, angles.yaw));
+    state.yaw = stableMotionYaw(nextYaw, nextPitch);
     state.pitch = nextPitch;
   });
 
