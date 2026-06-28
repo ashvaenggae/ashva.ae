@@ -29,6 +29,7 @@
   const editorMode = isLocalViewer && (pageParams.get("edit") === "1" || pageParams.get("admin") === "1");
   const embedMode = pageParams.get("embed") === "1";
   const recentMetaKey = "ashva3dRecentImages";
+  const motionPitchLimit = 72;
 
   document.body.classList.toggle("editor-mode", editorMode);
   document.body.classList.toggle("viewer-mode", !editorMode);
@@ -893,8 +894,8 @@
       state.baseScreenAngle = currentScreenAngle();
     }
 
-    state.yaw = normalizeYaw(state.baseMotionYaw - event.alpha);
-    state.pitch = clamp(-motionPitch(event), -85, 85);
+    state.yaw = normalizeYaw(angleDelta(state.baseMotionYaw, event.alpha));
+    state.pitch = clamp(-motionPitch(event), -motionPitchLimit, motionPitchLimit);
   });
 
   document.addEventListener("fullscreenchange", function () {
