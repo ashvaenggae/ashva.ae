@@ -29,7 +29,8 @@
   const editorMode = isLocalViewer && (pageParams.get("edit") === "1" || pageParams.get("admin") === "1");
   const embedMode = pageParams.get("embed") === "1";
   const recentMetaKey = "ashva3dRecentImages";
-  const motionPitchLimit = 72;
+  const motionPitchLimit = 60;
+  const motionYawFreezePitch = 52;
 
   document.body.classList.toggle("editor-mode", editorMode);
   document.body.classList.toggle("viewer-mode", !editorMode);
@@ -58,6 +59,7 @@
     baseMotionPitch: null,
     baseMotionGamma: null,
     baseScreenAngle: 0,
+    lastMotionYaw: null,
     hotspots: []
   };
 
@@ -601,6 +603,7 @@
     state.baseMotionPitch = null;
     state.baseMotionGamma = null;
     state.baseScreenAngle = currentScreenAngle();
+    state.lastMotionYaw = null;
   }
 
   function currentScreenAngle() {
@@ -626,6 +629,20 @@
     }
 
     return 0;
+  }
+
+  function motionYaw(event, pitch) {
+    const nextYaw = normalizeYaw(angleDelta(state.baseMotionYaw, event.alpha));
+
+    if (state.lastMotionYaw !== null) {
+      const yawJump = Math.abs(angleDelta(nextYaw, state.lastMotionYaw));
+      if (Math.abs(pitch) >= motionYawFreezePitch || yawJump > 110) {
+        return state.lastMotionYaw;
+      }
+    }
+
+    state.lastMotionYaw = nextYaw;
+    return nextYaw;
   }
 
   function updateModeClass() {
@@ -880,6 +897,7 @@
     state.baseMotionPitch = null;
     state.baseMotionGamma = null;
     state.baseScreenAngle = currentScreenAngle();
+    state.lastMotionYaw = null;
   });
 
   window.addEventListener("deviceorientation", function (event) {
@@ -892,10 +910,12 @@
       state.baseMotionPitch = event.beta;
       state.baseMotionGamma = event.gamma;
       state.baseScreenAngle = currentScreenAngle();
+      state.lastMotionYaw = null;
     }
 
-    state.yaw = normalizeYaw(angleDelta(state.baseMotionYaw, event.alpha));
-    state.pitch = clamp(-motionPitch(event), -motionPitchLimit, motionPitchLimit);
+    const nextPitch = clamp(-motionPitch(event), -motionPitchLimit, motionPitchLimit);
+    state.yaw = motionYaw(event, nextPitch);
+    state.pitch = nextPitch;
   });
 
   document.addEventListener("fullscreenchange", function () {
