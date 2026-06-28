@@ -1006,8 +1006,8 @@
       state.lastMotionYaw = null;
     }
 
-    const nextPitch = clamp(angles.pitch - state.baseMotionPitch, -motionPitchLimit, motionPitchLimit);
-    const nextYaw = normalizeYaw(angleDelta(state.baseMotionYaw, angles.yaw));
+    const nextPitch = clamp(state.baseMotionPitch - angles.pitch, -motionPitchLimit, motionPitchLimit);
+    const nextYaw = normalizeYaw(angleDelta(angles.yaw, state.baseMotionYaw));
     state.yaw = stableMotionYaw(nextYaw, nextPitch);
     state.pitch = nextPitch;
   });
