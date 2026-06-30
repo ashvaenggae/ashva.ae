@@ -35,6 +35,8 @@
   const motionPitchLimit = 85;
   const motionYawFreezePitch = 82;
   const motionSmoothFactor = 0.16;
+  const viewSmoothFactor = 0.24;
+  const zoomSmoothFactor = 0.18;
 
   document.body.classList.toggle("editor-mode", editorMode);
   document.body.classList.toggle("viewer-mode", !editorMode);
@@ -50,7 +52,10 @@
   const state = {
     yaw: 0,
     pitch: 0,
+    viewYaw: 0,
+    viewPitch: 0,
     fov: 70,
+    viewFov: 70,
     stereoOffset: 3,
     texture: null,
     textureReady: false,
@@ -381,7 +386,7 @@
   }
 
   function matrixForView(yawDegrees, pitchDegrees, aspect) {
-    const projection = perspective(degToRad(state.fov), aspect, 0.01, 10);
+    const projection = perspective(degToRad(state.viewFov), aspect, 0.01, 10);
     const yaw = rotationY(degToRad(yawDegrees));
     const pitch = rotationX(degToRad(pitchDegrees));
     return multiply(projection, multiply(pitch, yaw));
@@ -392,13 +397,14 @@
     gl.uniformMatrix4fv(
       uniforms.matrix,
       false,
-      new Float32Array(matrixForView(state.yaw + yawOffset, state.pitch, width / height))
+      new Float32Array(matrixForView(state.viewYaw + yawOffset, state.viewPitch, width / height))
     );
     gl.drawElements(gl.TRIANGLES, mesh.indices.length, gl.UNSIGNED_SHORT, 0);
   }
 
   function draw() {
     updateMotionSmoothing();
+    updateViewSmoothing();
     resizeCanvas();
     gl.clearColor(0.07, 0.08, 0.1, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -523,6 +529,12 @@
     return normalizeYaw(current + angleDelta(target, current) * amount);
   }
 
+  function updateViewSmoothing() {
+    state.viewYaw = smoothYaw(state.viewYaw, state.yaw, viewSmoothFactor);
+    state.viewPitch += (state.pitch - state.viewPitch) * viewSmoothFactor;
+    state.viewFov += (state.fov - state.viewFov) * zoomSmoothFactor;
+  }
+
   function slugifyPath(value) {
     return value
       .trim()
@@ -615,6 +627,8 @@
   function resetCamera() {
     state.yaw = 0;
     state.pitch = 0;
+    state.viewYaw = 0;
+    state.viewPitch = 0;
     state.baseMotionYaw = null;
     state.baseMotionPitch = null;
     state.baseMotionGamma = null;
@@ -759,8 +773,8 @@
     const panelRect = viewerPanel.getBoundingClientRect();
     const centerX = panelRect.width / 2;
     const centerY = panelRect.height / 2;
-    const horizontalFov = state.fov * (panelRect.width / Math.max(1, panelRect.height));
-    const verticalFov = state.fov;
+    const horizontalFov = state.viewFov * (panelRect.width / Math.max(1, panelRect.height));
+    const verticalFov = state.viewFov;
 
     state.hotspots.forEach(function (hotspot) {
       if (!hotspot.element) {
@@ -772,8 +786,8 @@
         return;
       }
 
-      const dx = angleDelta(hotspot.yaw, normalizeYaw(state.yaw));
-      const dy = hotspot.pitch - state.pitch;
+      const dx = angleDelta(hotspot.yaw, normalizeYaw(state.viewYaw));
+      const dy = hotspot.pitch - state.viewPitch;
       const visible = Math.abs(dx) < horizontalFov / 2 && Math.abs(dy) < verticalFov / 2;
 
       hotspot.element.classList.toggle("hidden", !visible);
@@ -872,6 +886,8 @@
   });
 
   canvas.addEventListener("pointerdown", function (event) {
+    state.yaw = state.viewYaw;
+    state.pitch = state.viewPitch;
     state.dragging = true;
     state.dragX = event.clientX;
     state.dragY = event.clientY;
@@ -973,8 +989,8 @@
     state.hotspots.push({
       label,
       url,
-      yaw: normalizeYaw(state.yaw),
-      pitch: state.pitch,
+      yaw: normalizeYaw(state.viewYaw),
+      pitch: state.viewPitch,
       element: null
     });
     hotspotLabel.value = "";
