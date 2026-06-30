@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Project Operations Tracker</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">A</div>
+          <div>
+            <h1>Project Tracker</h1>
+            <p>Design consultancy operations</p>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Primary">
+          <button class="nav-item active" data-view="dashboard" title="Dashboard">
+            <span>Dashboard</span>
+          </button>
+          <button class="nav-item" data-view="overall" title="Overall tracker">
+            <span>Overall Tracker</span>
+          </button>
+          <button class="nav-item" data-view="projects" title="Projects">
+            <span>Projects</span>
+          </button>
+        </nav>
+
+        <div class="project-list" id="projectList"></div>
+
+        <div class="sidebar-actions">
+          <button class="icon-button" id="addProjectBtn" title="Add project">+</button>
+          <button class="icon-button" id="exportBtn" title="Export JSON">EX</button>
+          <label class="icon-button file-button" title="Import JSON">
+            IM
+            <input id="importFile" type="file" accept="application/json" />
+          </label>
+          <button class="icon-button danger" id="resetBtn" title="Reset sample data">RS</button>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" id="viewEyebrow">Portfolio</p>
+            <h2 id="viewTitle">Operations Dashboard</h2>
+          </div>
+          <div class="topbar-actions">
+            <input id="searchInput" type="search" placeholder="Search project, client, status" />
+            <select id="statusFilter" aria-label="Status filter">
+              <option value="">All Status</option>
+              <option>Active</option>
+              <option>On Hold</option>
+              <option>Completed</option>
+              <option>Cancelled</option>
+            </select>
+          </div>
+        </header>
+
+        <section id="appView" class="view"></section>
+      </main>
+    </div>
+
+    <template id="editableCellTemplate">
+      <td contenteditable="true" spellcheck="false"></td>
+    </template>
+
+    <script src="./app.js?v=20260630-1053"></script>
+  </body>
+</html>
