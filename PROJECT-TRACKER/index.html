@@ -10,7 +10,9 @@
     <div class="app-shell">
       <aside class="sidebar">
         <div class="brand">
-          <div class="brand-mark">A</div>
+          <div class="brand-mark">
+            <img src="./assets/ashva-favicon.png" alt="" aria-hidden="true" />
+          </div>
           <div>
             <h1>Project Tracker</h1>
             <p>Design consultancy operations</p>
@@ -44,9 +46,12 @@
 
       <main class="content">
         <header class="topbar">
-          <div>
-            <p class="eyebrow" id="viewEyebrow">Portfolio</p>
-            <h2 id="viewTitle">Operations Dashboard</h2>
+          <div class="topbar-brand">
+            <img src="./assets/ashva-logo.png" alt="ASHVA Engineering Consultants" />
+            <div class="sr-only">
+              <p id="viewEyebrow">Portfolio</p>
+              <h2 id="viewTitle">Operations Dashboard</h2>
+            </div>
           </div>
           <div class="topbar-actions">
             <input id="searchInput" type="search" placeholder="Search project, client, status" />
@@ -68,6 +73,6 @@
       <td contenteditable="true" spellcheck="false"></td>
     </template>
 
-    <script src="./app.js?v=20260630-1053"></script>
+    <script src="./app.js?v=20260630-1118"></script>
   </body>
 </html>
