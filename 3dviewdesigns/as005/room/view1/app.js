@@ -34,6 +34,7 @@
   const recentMetaKey = "ashva3dRecentImages";
   const motionPitchLimit = 85;
   const motionYawFreezePitch = 82;
+  const motionSmoothFactor = 0.16;
 
   document.body.classList.toggle("editor-mode", editorMode);
   document.body.classList.toggle("viewer-mode", !editorMode);
@@ -63,6 +64,9 @@
     baseMotionGamma: null,
     baseScreenAngle: 0,
     lastMotionYaw: null,
+    motionTargetYaw: 0,
+    motionTargetPitch: 0,
+    motionHasTarget: false,
     hotspots: []
   };
 
@@ -394,6 +398,7 @@
   }
 
   function draw() {
+    updateMotionSmoothing();
     resizeCanvas();
     gl.clearColor(0.07, 0.08, 0.1, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -514,6 +519,10 @@
     return ((degrees % 360) + 360) % 360;
   }
 
+  function smoothYaw(current, target, amount) {
+    return normalizeYaw(current + angleDelta(target, current) * amount);
+  }
+
   function slugifyPath(value) {
     return value
       .trim()
@@ -611,6 +620,9 @@
     state.baseMotionGamma = null;
     state.baseScreenAngle = currentScreenAngle();
     state.lastMotionYaw = null;
+    state.motionTargetYaw = 0;
+    state.motionTargetPitch = 0;
+    state.motionHasTarget = false;
   }
 
   function setFov(value) {
@@ -711,6 +723,15 @@
 
     state.lastMotionYaw = nextYaw;
     return nextYaw;
+  }
+
+  function updateMotionSmoothing() {
+    if (!state.motionEnabled || !state.motionHasTarget || state.dragging) {
+      return;
+    }
+
+    state.yaw = smoothYaw(state.yaw, state.motionTargetYaw, motionSmoothFactor);
+    state.pitch += (state.motionTargetPitch - state.pitch) * motionSmoothFactor;
   }
 
   function updateModeClass() {
@@ -989,6 +1010,9 @@
     state.baseMotionGamma = null;
     state.baseScreenAngle = currentScreenAngle();
     state.lastMotionYaw = null;
+    state.motionTargetYaw = state.yaw;
+    state.motionTargetPitch = state.pitch;
+    state.motionHasTarget = false;
   });
 
   window.addEventListener("deviceorientation", function (event) {
@@ -1008,8 +1032,9 @@
 
     const nextPitch = clamp(state.baseMotionPitch - angles.pitch, -motionPitchLimit, motionPitchLimit);
     const nextYaw = normalizeYaw(angleDelta(angles.yaw, state.baseMotionYaw));
-    state.yaw = stableMotionYaw(nextYaw, nextPitch);
-    state.pitch = nextPitch;
+    state.motionTargetYaw = stableMotionYaw(nextYaw, nextPitch);
+    state.motionTargetPitch = nextPitch;
+    state.motionHasTarget = true;
   });
 
   document.addEventListener("fullscreenchange", function () {
