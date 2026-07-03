@@ -4,7 +4,7 @@ const options = {
   designStages: ["PRELIMINARY", "FINAL"],
   disciplines: ["Architecture", "STRUCTURE", "ELECTRICAL", "Mechanical", "Plumbing", "DCD"],
   authorities: ["Dubai Municipality", "DDA", "Dubai South", "Trakhees", "Emaar", "Nakheel", "Master Developer", "DEWA - ELE", "DEWA - Water", "DCD"],
-  dailyFor: ["Client", "Dubai Municipality", "DDA", "Dubai South", "Trakhees", "Emaar", "Nakheel", "Master Developer", "DEWA - ELE", "DEWA - Water", "DCD"],
+  dailyFor: ["Client", "Contractor", "Dubai Municipality", "DDA", "Dubai South", "Trakhees", "Emaar", "Nakheel", "Master Developer", "DEWA - ELE", "DEWA - Water", "DCD"],
   dailyStatuses: ["In Progress", "Submitted", "Done"],
   projectStatuses: ["Active", "On Hold", "Completed", "Cancelled"],
   priorities: ["High", "Medium", "Low"],
