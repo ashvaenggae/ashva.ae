@@ -593,7 +593,6 @@ function selectControl(values, value, attrs) {
   const current = String(value || "");
   const allValues = current && !values.includes(current) ? [current, ...values] : values;
   return `<select class="cell-select" ${attrs}>
-    <option value=""></option>
     ${allValues.map((option) => `<option value="${escapeHtml(option)}" ${option === current ? "selected" : ""}>${escapeHtml(option)}</option>`).join("")}
   </select>`;
 }
