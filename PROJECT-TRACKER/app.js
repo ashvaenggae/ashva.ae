@@ -4,6 +4,8 @@ const options = {
   designStages: ["PRELIMINARY", "FINAL"],
   disciplines: ["Architecture", "STRUCTURE", "ELECTRICAL", "Mechanical", "Plumbing", "DCD"],
   authorities: ["Dubai Municipality", "DDA", "Dubai South", "Trakhees", "Emaar", "Nakheel", "Master Developer", "DEWA - ELE", "DEWA - Water", "DCD"],
+  dailyFor: ["Authorities", "Client"],
+  dailyStatuses: ["In Progress", "Submitted", "Done"],
   projectStatuses: ["Active", "On Hold", "Completed", "Cancelled"],
   priorities: ["High", "Medium", "Low"],
   designStatuses: ["Not Started", "In Progress", "On Track", "At Risk", "Delayed", "Completed", "Minor Comments"],
@@ -169,6 +171,11 @@ const seedProjects = [
 const designColumns = ["Stage Group", "Stage Description", "Discipline", "Owner", "Planned Start", "Duration Days", "ETS", "Submission Date", "Actual Approval", "Status", "Delay Reason / Action"];
 const approvalColumns = ["Authority", "Application / Milestone", "Submission Date", "Resubmission Date", "Target Approval", "Actual Approval", "Status", "Priority", "Owner", "Dependency / Comment", "Next Action"];
 const constructionColumns = ["Construction Stage", "Contractor / Party", "Planned Start", "Planned Finish", "Actual Start", "Actual Finish", "% Complete", "Status", "Priority", "Blocker / Delay Reason", "Next Site Action"];
+const dailyTaskColumns = ["Daily Task", "Description", "Project Number", "For", "Priority", "Assigned To", "Status"];
+const seedDailyTasks = [
+  ["Follow up DDA reviewer", "Confirm response timeline for load NOC comments.", "AS011", "Authorities", "High", "Hassan", "In Progress", ""],
+  ["Client design comments", "Collect pending facade option decision.", "AS006", "Client", "Medium", "Sara", "Submitted", ""],
+];
 
 let state = loadState();
 let currentView = "dashboard";
@@ -199,12 +206,14 @@ render();
 
 function loadState() {
   const saved = localStorage.getItem(storageKey);
-  if (!saved) return { projects: structuredClone(seedProjects) };
+  if (!saved) return cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks) });
   try {
     const parsed = JSON.parse(saved);
-    return parsed.projects ? parsed : { projects: structuredClone(seedProjects) };
+    if (!parsed.projects) return cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks) });
+    if (!Array.isArray(parsed.dailyTasks)) parsed.dailyTasks = [];
+    return cleanupDailyTasks(parsed);
   } catch {
-    return { projects: structuredClone(seedProjects) };
+    return cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks) });
   }
 }
 
@@ -286,8 +295,12 @@ function renderDashboard() {
 function renderOverall() {
   viewEyebrow.textContent = "Rollup";
   viewTitle.textContent = "Overall Tracker";
+  const dailyCount = state.dailyTasks.length;
+  cleanupDailyTasks(state);
+  if (dailyCount !== state.dailyTasks.length) saveState();
   const rows = flattenTracker(filteredProjects());
   appView.innerHTML = `
+    ${dailyTasksPanel()}
     <div class="panel">
       <div class="panel-title">Combined Tracker</div>
       <div class="table-wrap">
@@ -297,6 +310,7 @@ function renderOverall() {
         </table>
       </div>
     </div>`;
+  bindDailyTasks();
 }
 
 function renderProjectIndex() {
@@ -448,6 +462,81 @@ function projectTable(projects) {
   </table></div>`;
 }
 
+function dailyTasksPanel() {
+  return `
+    <div class="panel daily-panel">
+      <div class="panel-title purple"><span>Daily Tasks</span><button class="heading-button" id="addDailyTaskBtn" title="Add daily task">Add Task</button></div>
+      <div class="table-wrap">
+        <table class="daily-table">
+          <thead><tr>${dailyTaskColumns.map((h) => `<th>${h}</th>`).join("")}<th></th></tr></thead>
+          <tbody>${state.dailyTasks.map(dailyTaskRow).join("") || `<tr><td colspan="8" class="empty-row">No active daily tasks.</td></tr>`}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function dailyTaskRow(row, rowIndex) {
+  const cells = dailyTaskColumns.map((column, colIndex) => {
+    const value = row[colIndex] || "";
+    const selectValues = dailyTaskOptions(colIndex);
+    if (selectValues) {
+      return `<td>${selectControl(selectValues, value, `data-daily-row="${rowIndex}" data-daily-col="${colIndex}"`)}</td>`;
+    }
+    const rendered = colIndex === 6 ? statusPill(value) : escapeHtml(value);
+    return `<td contenteditable="true" spellcheck="false" data-daily-row="${rowIndex}" data-daily-col="${colIndex}">${rendered}</td>`;
+  }).join("");
+  return `<tr>${cells}<td><button class="small-button" data-delete-daily="${rowIndex}">Delete</button></td></tr>`;
+}
+
+function dailyTaskOptions(colIndex) {
+  if (colIndex === 2) return state.projects.map((project) => project.code);
+  if (colIndex === 3) return options.dailyFor;
+  if (colIndex === 4) return options.priorities;
+  if (colIndex === 6) return options.dailyStatuses;
+  return null;
+}
+
+function bindDailyTasks() {
+  const addButton = document.getElementById("addDailyTaskBtn");
+  if (addButton) {
+    addButton.addEventListener("click", () => {
+      state.dailyTasks.unshift(["", "", currentProject || state.projects[0]?.code || "", "Authorities", "Medium", "", "In Progress", ""]);
+      saveState();
+      render();
+    });
+  }
+  appView.querySelectorAll("select[data-daily-row]").forEach((select) => {
+    select.addEventListener("change", () => {
+      const row = Number(select.dataset.dailyRow);
+      const col = Number(select.dataset.dailyCol);
+      state.dailyTasks[row][col] = select.value;
+      if (col === 6) state.dailyTasks[row][7] = select.value === "Done" ? todayKey() : "";
+      saveState();
+      render();
+    });
+  });
+  appView.querySelectorAll("[data-daily-row]").forEach((cell) => {
+    if (cell.tagName === "SELECT") return;
+    cell.addEventListener("focus", () => {
+      cell.textContent = cell.textContent.trim();
+    });
+    cell.addEventListener("blur", () => {
+      const row = Number(cell.dataset.dailyRow);
+      const col = Number(cell.dataset.dailyCol);
+      state.dailyTasks[row][col] = cell.textContent.trim();
+      saveState();
+      render();
+    });
+  });
+  appView.querySelectorAll("[data-delete-daily]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.dailyTasks.splice(Number(button.dataset.deleteDaily), 1);
+      saveState();
+      render();
+    });
+  });
+}
+
 function statusSummaryTable(rows, statuses) {
   return `<div class="table-wrap"><table>
     <thead><tr><th>Status</th><th>Count</th><th>High Priority</th></tr></thead>
@@ -515,6 +604,16 @@ function statusPill(status) {
   return `<span class="status-pill status-${klass}">${escapeHtml(value)}</span>`;
 }
 
+function cleanupDailyTasks(sourceState) {
+  const today = todayKey();
+  sourceState.dailyTasks = (sourceState.dailyTasks || []).filter((row) => row[6] !== "Done" || !row[7] || row[7] >= today);
+  return sourceState;
+}
+
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 function avg(values) {
   const valid = values.filter((v) => Number.isFinite(v));
   return valid.length ? valid.reduce((sum, value) => sum + value, 0) / valid.length : 0;
@@ -568,7 +667,8 @@ function importData(event) {
     try {
       const imported = JSON.parse(reader.result);
       if (!Array.isArray(imported.projects)) throw new Error("Missing projects array");
-      state = imported;
+      if (!Array.isArray(imported.dailyTasks)) imported.dailyTasks = [];
+      state = cleanupDailyTasks(imported);
       currentProject = state.projects[0]?.code || "";
       saveState();
       render();
@@ -581,7 +681,7 @@ function importData(event) {
 
 function resetData() {
   if (!confirm("Reset tracker to sample data?")) return;
-  state = { projects: structuredClone(seedProjects) };
+  state = { projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks) };
   currentProject = state.projects[0]?.code || "";
   currentView = "dashboard";
   saveState();

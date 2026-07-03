@@ -277,6 +277,10 @@ select {
   overflow: hidden;
 }
 
+.daily-panel {
+  margin-bottom: 18px;
+}
+
 .panel-title {
   padding: 10px 12px;
   font-weight: 800;
@@ -338,6 +342,12 @@ th {
 
 tbody tr:nth-child(even) td {
   background: #fbf7ef;
+}
+
+.empty-row {
+  color: var(--grey);
+  text-align: center;
+  font-weight: 700;
 }
 
 td[contenteditable="true"] {
