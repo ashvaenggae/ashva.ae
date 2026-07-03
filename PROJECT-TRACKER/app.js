@@ -4,7 +4,7 @@ const options = {
   designStages: ["PRELIMINARY", "FINAL"],
   disciplines: ["Architecture", "STRUCTURE", "ELECTRICAL", "Mechanical", "Plumbing", "DCD"],
   authorities: ["Dubai Municipality", "DDA", "Dubai South", "Trakhees", "Emaar", "Nakheel", "Master Developer", "DEWA - ELE", "DEWA - Water", "DCD"],
-  dailyFor: ["Authorities", "Client"],
+  dailyFor: ["Client", "Dubai Municipality", "DDA", "Dubai South", "Trakhees", "Emaar", "Nakheel", "Master Developer", "DEWA - ELE", "DEWA - Water", "DCD"],
   dailyStatuses: ["In Progress", "Submitted", "Done"],
   projectStatuses: ["Active", "On Hold", "Completed", "Cancelled"],
   priorities: ["High", "Medium", "Low"],
@@ -173,13 +173,14 @@ const approvalColumns = ["Authority", "Application / Milestone", "Submission Dat
 const constructionColumns = ["Construction Stage", "Contractor / Party", "Planned Start", "Planned Finish", "Actual Start", "Actual Finish", "% Complete", "Status", "Priority", "Blocker / Delay Reason", "Next Site Action"];
 const dailyTaskColumns = ["Daily Task", "Description", "Project Number", "For", "Priority", "Assigned To", "Status"];
 const seedDailyTasks = [
-  ["Follow up DDA reviewer", "Confirm response timeline for load NOC comments.", "AS011", "Authorities", "High", "Hassan", "In Progress", ""],
+  ["Follow up DDA reviewer", "Confirm response timeline for load NOC comments.", "AS011", "DDA", "High", "Hassan", "In Progress", ""],
   ["Client design comments", "Collect pending facade option decision.", "AS006", "Client", "Medium", "Sara", "Submitted", ""],
 ];
 
 let state = loadState();
 let currentView = "dashboard";
 let currentProject = state.projects[0]?.code || "";
+let currentOverallProject = "";
 
 const appView = document.getElementById("appView");
 const viewTitle = document.getElementById("viewTitle");
@@ -206,14 +207,15 @@ render();
 
 function loadState() {
   const saved = localStorage.getItem(storageKey);
-  if (!saved) return cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks) });
+  if (!saved) return cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks), completedDailyTasks: [] });
   try {
     const parsed = JSON.parse(saved);
-    if (!parsed.projects) return cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks) });
+    if (!parsed.projects) return cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks), completedDailyTasks: [] });
     if (!Array.isArray(parsed.dailyTasks)) parsed.dailyTasks = [];
+    if (!Array.isArray(parsed.completedDailyTasks)) parsed.completedDailyTasks = [];
     return cleanupDailyTasks(parsed);
   } catch {
-    return cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks) });
+    return cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks), completedDailyTasks: [] });
   }
 }
 
@@ -298,11 +300,14 @@ function renderOverall() {
   const dailyCount = state.dailyTasks.length;
   cleanupDailyTasks(state);
   if (dailyCount !== state.dailyTasks.length) saveState();
-  const rows = flattenTracker(filteredProjects());
+  const projects = filteredProjects();
+  const filteredOverallProjects = currentOverallProject ? projects.filter((project) => project.code === currentOverallProject) : projects;
+  if (currentOverallProject && !filteredOverallProjects.length) currentOverallProject = "";
+  const rows = flattenTracker(currentOverallProject ? filteredOverallProjects : projects);
   appView.innerHTML = `
     ${dailyTasksPanel()}
     <div class="panel">
-      <div class="panel-title">Combined Tracker</div>
+      <div class="panel-title"><span>Combined Tracker</span>${overallProjectFilter(projects)}</div>
       <div class="table-wrap">
         <table>
           <thead><tr>${["Project Code", "Project", "Type", "Stage / Authority", "Milestone", "Owner / Party", "Start / Submission", "Target", "Actual", "% Complete", "Status", "Priority", "Comment", "Next Action"].map((h) => `<th>${h}</th>`).join("")}</tr></thead>
@@ -311,6 +316,7 @@ function renderOverall() {
       </div>
     </div>`;
   bindDailyTasks();
+  bindOverallFilters();
 }
 
 function renderProjectIndex() {
@@ -468,7 +474,7 @@ function dailyTasksPanel() {
       <div class="panel-title purple"><span>Daily Tasks</span><button class="heading-button" id="addDailyTaskBtn" title="Add daily task">Add Task</button></div>
       <div class="table-wrap">
         <table class="daily-table">
-          <thead><tr>${dailyTaskColumns.map((h) => `<th>${h}</th>`).join("")}<th></th></tr></thead>
+          <thead><tr>${dailyTaskColumns.map((h) => `<th>${h}</th>`).join("")}<th>Actions</th></tr></thead>
           <tbody>${state.dailyTasks.map(dailyTaskRow).join("") || `<tr><td colspan="8" class="empty-row">No active daily tasks.</td></tr>`}</tbody>
         </table>
       </div>
@@ -485,7 +491,7 @@ function dailyTaskRow(row, rowIndex) {
     const rendered = colIndex === 6 ? statusPill(value) : escapeHtml(value);
     return `<td contenteditable="true" spellcheck="false" data-daily-row="${rowIndex}" data-daily-col="${colIndex}">${rendered}</td>`;
   }).join("");
-  return `<tr>${cells}<td><button class="small-button" data-delete-daily="${rowIndex}">Delete</button></td></tr>`;
+  return `<tr>${cells}<td><div class="row-actions"><button class="small-button success" data-complete-daily="${rowIndex}">Completed</button><button class="small-button" data-delete-daily="${rowIndex}">Delete</button></div></td></tr>`;
 }
 
 function dailyTaskOptions(colIndex) {
@@ -500,7 +506,7 @@ function bindDailyTasks() {
   const addButton = document.getElementById("addDailyTaskBtn");
   if (addButton) {
     addButton.addEventListener("click", () => {
-      state.dailyTasks.unshift(["", "", currentProject || state.projects[0]?.code || "", "Authorities", "Medium", "", "In Progress", ""]);
+      state.dailyTasks.unshift(["", "", currentProject || state.projects[0]?.code || "", "Client", "Medium", "", "In Progress", ""]);
       saveState();
       render();
     });
@@ -535,6 +541,37 @@ function bindDailyTasks() {
       render();
     });
   });
+  appView.querySelectorAll("[data-complete-daily]").forEach((button) => {
+    button.addEventListener("click", () => {
+      completeDailyTask(Number(button.dataset.completeDaily));
+      saveState();
+      render();
+    });
+  });
+}
+
+function overallProjectFilter(projects) {
+  const values = ["All Projects", ...projects.map((project) => project.code)];
+  return `<label class="heading-filter">Project ${selectControl(values, currentOverallProject || "All Projects", "id=\"overallProjectFilter\"")}</label>`;
+}
+
+function bindOverallFilters() {
+  const filter = document.getElementById("overallProjectFilter");
+  if (!filter) return;
+  filter.addEventListener("change", () => {
+    currentOverallProject = filter.value === "All Projects" ? "" : filter.value;
+    render();
+  });
+}
+
+function completeDailyTask(rowIndex) {
+  const task = state.dailyTasks[rowIndex];
+  if (!task) return;
+  const completed = [...task];
+  completed[6] = "Completed";
+  completed[7] = todayKey();
+  state.completedDailyTasks.unshift(completed);
+  state.dailyTasks.splice(rowIndex, 1);
 }
 
 function statusSummaryTable(rows, statuses) {
@@ -553,7 +590,9 @@ function overallRow(row) {
 }
 
 function flattenTracker(projects) {
-  return projects.flatMap((project) => [
+  const projectCodes = new Set(projects.map((project) => project.code));
+  const projectNames = new Map(projects.map((project) => [project.code, project.name]));
+  const trackerRows = projects.flatMap((project) => [
     ...project.design.filter(hasData).map((row) => ({
       code: project.code, project: project.name, type: "Design", stage: row[0], milestone: row[1], owner: row[3],
       start: row[4], target: row[6], actual: row[8] || row[7], complete: "", status: row[9], priority: project.priority, comment: row[10], next: "",
@@ -567,6 +606,23 @@ function flattenTracker(projects) {
       start: row[2], target: row[3], actual: row[5], complete: `${row[6] || 0}%`, status: row[7], priority: row[8], comment: row[9], next: row[10],
     })),
   ]);
+  const completedDailyRows = (state.completedDailyTasks || []).filter((row) => projectCodes.has(row[2])).map((row) => ({
+    code: row[2],
+    project: projectNames.get(row[2]) || "",
+    type: "Daily Task",
+    stage: row[3],
+    milestone: row[0],
+    owner: row[5],
+    start: row[7] || "",
+    target: "",
+    actual: row[7] || "",
+    complete: "100%",
+    status: "Completed",
+    priority: row[4],
+    comment: row[1],
+    next: "Completed from Daily Tasks",
+  }));
+  return [...completedDailyRows, ...trackerRows];
 }
 
 function hasData(row) {
@@ -605,8 +661,17 @@ function statusPill(status) {
 
 function cleanupDailyTasks(sourceState) {
   const today = todayKey();
-  sourceState.dailyTasks = (sourceState.dailyTasks || []).filter((row) => row[6] !== "Done" || !row[7] || row[7] >= today);
+  sourceState.dailyTasks = normalizeDailyRows(sourceState.dailyTasks || []).filter((row) => row[6] !== "Done" || !row[7] || row[7] >= today);
+  sourceState.completedDailyTasks = normalizeDailyRows(sourceState.completedDailyTasks || []);
   return sourceState;
+}
+
+function normalizeDailyRows(rows) {
+  return rows.map((row) => {
+    const normalized = [...row];
+    if (normalized[3] === "Authorities") normalized[3] = "Dubai Municipality";
+    return normalized;
+  });
 }
 
 function todayKey() {
@@ -667,8 +732,10 @@ function importData(event) {
       const imported = JSON.parse(reader.result);
       if (!Array.isArray(imported.projects)) throw new Error("Missing projects array");
       if (!Array.isArray(imported.dailyTasks)) imported.dailyTasks = [];
+      if (!Array.isArray(imported.completedDailyTasks)) imported.completedDailyTasks = [];
       state = cleanupDailyTasks(imported);
       currentProject = state.projects[0]?.code || "";
+      currentOverallProject = "";
       saveState();
       render();
     } catch (error) {
@@ -680,8 +747,9 @@ function importData(event) {
 
 function resetData() {
   if (!confirm("Reset tracker to sample data?")) return;
-  state = { projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks) };
+  state = { projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks), completedDailyTasks: [] };
   currentProject = state.projects[0]?.code || "";
+  currentOverallProject = "";
   currentView = "dashboard";
   saveState();
   render();
