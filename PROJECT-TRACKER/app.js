@@ -310,7 +310,7 @@ function renderOverall() {
       <div class="panel-title"><span>Combined Tracker</span>${overallProjectFilter(projects)}</div>
       <div class="table-wrap">
         <table>
-          <thead><tr>${["Project Code", "Project", "Type", "Stage / Authority", "Milestone", "Owner / Party", "Start / Submission", "Target", "Actual", "% Complete", "Status", "Priority", "Comment", "Next Action"].map((h) => `<th>${h}</th>`).join("")}</tr></thead>
+          <thead><tr>${["Project Code", "Project", "Type", "Stage / Authority", "Milestone", "Owner / Party", "Start / Submission", "Target", "Actual", "Status", "Priority", "Comment", "Next Action"].map((h) => `<th>${h}</th>`).join("")}</tr></thead>
           <tbody>${rows.map(overallRow).join("")}</tbody>
         </table>
       </div>
@@ -584,7 +584,7 @@ function statusSummaryTable(rows, statuses) {
 function overallRow(row) {
   return `<tr>
     <td>${escapeHtml(row.code)}</td><td>${escapeHtml(row.project)}</td><td>${escapeHtml(row.type)}</td><td>${escapeHtml(row.stage)}</td><td>${escapeHtml(row.milestone)}</td>
-    <td>${escapeHtml(row.owner)}</td><td>${escapeHtml(row.start)}</td><td>${escapeHtml(row.target)}</td><td>${escapeHtml(row.actual)}</td><td>${escapeHtml(row.complete)}</td>
+    <td>${escapeHtml(row.owner)}</td><td>${escapeHtml(row.start)}</td><td>${escapeHtml(row.target)}</td><td>${escapeHtml(row.actual)}</td>
     <td>${statusPill(row.status)}</td><td>${escapeHtml(row.priority)}</td><td>${escapeHtml(row.comment)}</td><td>${escapeHtml(row.next)}</td>
   </tr>`;
 }
