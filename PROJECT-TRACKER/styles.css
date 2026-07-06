@@ -2,7 +2,7 @@
   --ink: #1f252d;
   --navy: #f8f4ed;
   --blue: #a87244;
-  --teal: #8a5a32;
+  --teal: #a17b5b;
   --green: #237a57;
   --amber: #c88416;
   --red: #b83f3f;
@@ -17,8 +17,8 @@
   --pale-amber: #fff3d6;
   --pale-red: #fdecec;
   --pale-grey: #f4eee5;
-  --copper: #8a5a32;
-  --copper-light: #a87244;
+  --copper: #a17b5b;
+  --copper-light: #ba8e69;
   --radius: 8px;
   color-scheme: light;
   font-family: Inter, "Segoe UI", Arial, sans-serif;
@@ -112,7 +112,7 @@ select {
   border-radius: 8px;
   padding: 10px 12px;
   color: var(--ink);
-  background: rgba(138, 90, 50, 0.08);
+  background: rgba(161, 123, 91, 0.08);
   text-align: left;
   cursor: pointer;
 }
@@ -142,7 +142,7 @@ select {
   height: 38px;
   border: 0;
   border-radius: 8px;
-  background: rgba(138, 90, 50, 0.1);
+  background: rgba(161, 123, 91, 0.1);
   color: var(--copper);
   cursor: pointer;
   display: grid;
@@ -153,7 +153,7 @@ select {
 .icon-button:hover,
 .nav-item:hover,
 .project-tab:hover {
-  background: rgba(138, 90, 50, 0.18);
+  background: rgba(161, 123, 91, 0.18);
 }
 
 .icon-button.danger {
@@ -322,6 +322,24 @@ table {
   min-width: 860px;
 }
 
+.compact-table {
+  min-width: 0;
+}
+
+.compact-table th,
+.compact-table td {
+  padding: 7px 8px;
+}
+
+.compact-table th:first-child,
+.compact-table td:first-child {
+  min-width: 190px;
+}
+
+.compact-table-wrap {
+  max-height: 374px;
+}
+
 th,
 td {
   border-bottom: 1px solid var(--line);
@@ -403,15 +421,41 @@ th {
 
 .status-not-started,
 .status-on-hold {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--pale-grey);
   color: var(--grey);
+}
+
+.status-applied,
+.status-pending {
+  background: var(--pale-amber);
+  color: var(--amber);
+}
+
+.status-received {
+  background: var(--pale-green);
+  color: var(--green);
+}
+
+.status-not-applicable {
+  background: #fff;
+  color: var(--grey);
+  border: 1px solid var(--line);
+}
+
+.status-missing {
+  background: var(--pale-red);
+  color: var(--red);
 }
 
 .project-header {
   display: grid;
-  grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);
+  grid-template-columns: minmax(300px, 0.75fr) minmax(360px, 1fr) minmax(320px, 0.85fr);
   gap: 14px;
   margin-bottom: 18px;
+}
+
+.project-details-panel .detail-grid {
+  grid-template-columns: 140px minmax(0, 1fr);
 }
 
 .detail-grid {
@@ -464,11 +508,74 @@ th {
   color: #fff;
 }
 
+.small-button.edit {
+  background: var(--pale-blue);
+  border-color: rgba(168, 114, 68, 0.28);
+  color: var(--blue);
+}
+
+.small-button.edit:hover {
+  background: var(--blue);
+  color: #fff;
+}
+
+.small-button.danger {
+  background: var(--pale-red);
+  border-color: rgba(184, 63, 63, 0.28);
+  color: var(--red);
+}
+
+.small-button.danger:hover {
+  background: var(--red);
+  color: #fff;
+}
+
+.symbol-button {
+  width: 36px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.symbol-button.success {
+  background: var(--pale-green);
+  color: #00a824;
+}
+
+.symbol-button.success:hover {
+  background: #00a824;
+  color: #fff;
+}
+
+.symbol-button.danger {
+  background: var(--pale-red);
+  color: #e80000;
+}
+
+.symbol-button.danger:hover {
+  background: #e80000;
+  color: #fff;
+}
+
 .row-actions {
   display: flex;
   gap: 6px;
   align-items: center;
   white-space: nowrap;
+}
+
+.locked-row td {
+  background: #fbf7ef;
+}
+
+.locked-cell {
+  color: var(--grey);
 }
 
 .heading-filter {
@@ -485,7 +592,7 @@ th {
 }
 
 .heading-button {
-  border: 1px solid rgba(138, 90, 50, 0.34);
+  border: 1px solid rgba(161, 123, 91, 0.34);
   border-radius: 8px;
   background: #fff;
   color: inherit;
@@ -516,8 +623,65 @@ th {
   outline-offset: -1px;
 }
 
+.cell-select.status-select {
+  border-radius: 999px;
+  border-color: transparent;
+  font-weight: 700;
+  min-height: 30px;
+  padding: 4px 28px 4px 10px;
+}
+
+.cell-select.status-select.status-completed,
+.cell-select.status-select.status-approved,
+.cell-select.status-select.status-on-track,
+.cell-select.status-select.status-active,
+.cell-select.status-select.status-received {
+  background: var(--pale-green);
+  color: var(--green);
+}
+
+.cell-select.status-select.status-in-progress,
+.cell-select.status-select.status-submitted {
+  background: var(--pale-blue);
+  color: var(--blue);
+}
+
+.cell-select.status-select.status-at-risk,
+.cell-select.status-select.status-minor-comments,
+.cell-select.status-select.status-applied,
+.cell-select.status-select.status-pending {
+  background: var(--pale-amber);
+  color: var(--amber);
+}
+
+.cell-select.status-select.status-delayed,
+.cell-select.status-select.status-rejected,
+.cell-select.status-select.status-cancelled,
+.cell-select.status-select.status-missing {
+  background: var(--pale-red);
+  color: var(--red);
+}
+
+.cell-select.status-select.status-not-applicable {
+  background: #fff;
+  border-color: var(--line);
+  color: var(--grey);
+}
+
+.cell-select.status-select.status-not-started,
+.cell-select.status-select.status-on-hold,
+.cell-select.status-select.status-mobilized {
+  background: var(--pale-grey);
+  color: var(--grey);
+}
+
+.stage-select,
+.stage-group-cell {
+  font-weight: 800;
+}
+
 .panel-title.amber .heading-button {
-  border-color: rgba(138, 90, 50, 0.34);
+  border-color: rgba(161, 123, 91, 0.34);
   background: #fff;
 }
 

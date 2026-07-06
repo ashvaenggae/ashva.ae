@@ -1,11 +1,14 @@
-const storageKey = "design-consultancy-project-tracker-v4";
+const storageKey = "design-consultancy-project-tracker-v5";
 
 const options = {
-  designStages: ["PRELIMINARY", "FINAL"],
+  designStages: ["PRELIMINARY", "FINAL", "TENDER"],
   disciplines: ["Architecture", "STRUCTURE", "ELECTRICAL", "Mechanical", "Plumbing", "DCD"],
   authorities: ["Dubai Municipality", "DDA", "Dubai South", "Trakhees", "Emaar", "Nakheel", "Master Developer", "DEWA - ELE", "DEWA - Water", "DCD"],
+  projectAuthorities: ["Dubai Municipality", "DDA", "Dubai South", "Trakhees"],
   dailyFor: ["Client", "Contractor", "Dubai Municipality", "DDA", "Dubai South", "Trakhees", "Emaar", "Nakheel", "Master Developer", "DEWA - ELE", "DEWA - Water", "DCD"],
   dailyStatuses: ["In Progress", "Submitted", "Done"],
+  nocStatuses: ["Applied", "Approved", "Not Applicable", "Rejected"],
+  documentStatuses: ["Pending", "Received", "Not Applicable", "Missing"],
   projectStatuses: ["Active", "On Hold", "Completed", "Cancelled"],
   priorities: ["High", "Medium", "Low"],
   designStatuses: ["Not Started", "In Progress", "On Track", "At Risk", "Delayed", "Completed", "Minor Comments"],
@@ -41,146 +44,33 @@ const seedProjects = [
     ],
     construction: [["Tender / Contractor Selection", "TBC", "2026-04-24", "2026-05-25", "", "", "0", "Not Started", "High", "Final authority approval pending.", "Prepare tender list."]],
   },
-  {
-    code: "AS006",
-    name: "Private Villa Renovation",
-    client: "Al Noor Holdings",
-    location: "Jumeirah",
-    status: "Active",
-    phase: "Preliminary Design",
-    priority: "Medium",
-    lead: "Sara",
-    lpo: "2026-02-15",
-    target: "2026-09-15",
-    complete: 32,
-    notes: "Client review meeting pending.",
-    design: [
-      ["PRELIMINARY", "Concept options", "Architecture", "Sara", "2026-02-15", "21", "2026-03-07", "2026-03-09", "", "Minor Comments", "Client requested facade alternate."],
-      ["PRELIMINARY", "Client preliminary approval", "Architecture", "Sara", "2026-03-10", "14", "2026-03-24", "", "", "In Progress", "Meeting to close comments."],
-    ],
-    approvals: [],
-    construction: [],
-  },
-  {
-    code: "AS007",
-    name: "Boutique Retail Fit-out",
-    client: "Nexa Retail",
-    location: "Dubai Hills",
-    status: "Active",
-    phase: "Authority Approvals",
-    priority: "High",
-    lead: "Hassan",
-    lpo: "2026-01-10",
-    target: "2026-08-20",
-    complete: 64,
-    notes: "DCD final approval under review.",
-    design: [["FINAL", "IFC package coordination", "Mechanical", "Hassan", "2026-04-01", "35", "2026-05-06", "2026-05-15", "", "Delayed", "MEP builder information arrived late."]],
-    approvals: [["Dubai Municipality", "Final Approval", "2026-05-28", "2026-06-12", "2026-07-05", "", "In Progress", "High", "Hassan", "Resubmitted after smoke extract comment.", "Follow up reviewer."]],
-    construction: [["Fit-out Mobilization", "Prime Fitout", "2026-07-10", "2026-07-20", "", "", "0", "Not Started", "High", "Permit under review.", "Confirm mobilization date."]],
-  },
-  {
-    code: "AS008",
-    name: "Warehouse Extension",
-    client: "BlueLine Logistics",
-    location: "Dubai South",
-    status: "Active",
-    phase: "Construction",
-    priority: "Medium",
-    lead: "Mina",
-    lpo: "2025-11-20",
-    target: "2026-10-10",
-    complete: 71,
-    notes: "Site progress generally on track.",
-    design: [["FINAL", "Tender clarifications", "Architecture", "Mina", "2026-04-08", "10", "2026-04-18", "2026-04-17", "2026-04-20", "Completed", ""]],
-    approvals: [["Dubai South", "Final Design Submission", "2025-12-18", "2026-01-27", "2026-03-25", "2026-03-25", "Approved", "Medium", "Mina", "Architectural and structural approvals received.", "Close authority tracker."]],
-    construction: [
-      ["Substructure", "BlueLine Contractor", "2026-04-28", "2026-06-15", "2026-04-29", "", "88", "On Track", "Medium", "", "Close waterproofing inspection."],
-      ["Superstructure", "BlueLine Contractor", "2026-06-16", "2026-08-20", "", "", "12", "In Progress", "Medium", "Steel delivery to be monitored.", "Confirm delivery schedule."],
-    ],
-  },
-  {
-    code: "AS009",
-    name: "G+4 Residential Building",
-    client: "Al Safa Properties",
-    location: "Nad Al Sheba",
-    status: "Active",
-    phase: "Final Design",
-    priority: "High",
-    lead: "Arjun",
-    lpo: "2026-03-01",
-    target: "2027-01-15",
-    complete: 41,
-    notes: "Structural coordination risk.",
-    design: [["FINAL", "Structural coordination freeze", "STRUCTURE", "Arjun", "2026-05-05", "20", "2026-05-25", "", "", "At Risk", "Column grid change impacts MEP risers."]],
-    approvals: [["Dubai Municipality", "Structural Comments-01", "2026-02-19", "2026-02-19", "2026-03-15", "", "Minor Comments", "High", "Arjun", "Structural comment round open.", "Coordinate response."]],
-    construction: [["Enabling Works", "TBC", "2026-09-01", "2026-10-01", "", "", "0", "Not Started", "High", "Design freeze pending.", "Finalize tender documents."]],
-  },
-  {
-    code: "AS010",
-    name: "Hospitality Concept Upgrade",
-    client: "Vista Hospitality",
-    location: "Business Bay",
-    status: "On Hold",
-    phase: "Preliminary Design",
-    priority: "Low",
-    lead: "Sara",
-    lpo: "2026-04-05",
-    target: "2026-12-15",
-    complete: 18,
-    notes: "Awaiting revised operator brief.",
-    design: [],
-    approvals: [],
-    construction: [],
-  },
-  {
-    code: "AS011",
-    name: "Community Majlis",
-    client: "Meraas Community",
-    location: "Al Khawaneej",
-    status: "Active",
-    phase: "Authority Approvals",
-    priority: "Medium",
-    lead: "Hassan",
-    lpo: "2026-05-02",
-    target: "2026-11-30",
-    complete: 36,
-    notes: "DEWA load clarification required.",
-    design: [["PRELIMINARY", "Preliminary authority package", "Architecture", "Hassan", "2026-05-20", "18", "2026-06-07", "2026-06-10", "", "Minor Comments", "Drawing stamp update requested."]],
-    approvals: [["DDA", "Load NOC", "2026-06-14", "", "2026-07-08", "", "In Progress", "Medium", "Hassan", "Load clarification required.", "Issue revised load letter."]],
-    construction: [],
-  },
-  {
-    code: "AS012",
-    name: "Villa Landscape Package",
-    client: "Private Client",
-    location: "Emirates Hills",
-    status: "Completed",
-    phase: "Handover",
-    priority: "Low",
-    lead: "Mina",
-    lpo: "2025-09-15",
-    target: "2026-04-28",
-    complete: 100,
-    notes: "Closed.",
-    design: [],
-    approvals: [],
-    construction: [["Handover / Snag Closure", "Landscape Works LLC", "2026-04-01", "2026-04-28", "2026-04-01", "2026-04-28", "100", "Completed", "Low", "", "Archive completion records."]],
-  },
 ];
 
 const designColumns = ["Stage Group", "Stage Description", "Discipline", "Owner", "Planned Start", "Duration Days", "ETS", "Submission Date", "Actual Approval", "Status", "Delay Reason / Action"];
 const approvalColumns = ["Authority", "Application / Milestone", "Submission Date", "Resubmission Date", "Target Approval", "Actual Approval", "Status", "Priority", "Owner", "Dependency / Comment", "Next Action"];
 const constructionColumns = ["Construction Stage", "Contractor / Party", "Planned Start", "Planned Finish", "Actual Start", "Actual Finish", "% Complete", "Status", "Priority", "Blocker / Delay Reason", "Next Site Action"];
 const dailyTaskColumns = ["Daily Task", "Description", "Project Number", "For", "Priority", "Assigned To", "Status"];
-const seedDailyTasks = [
-  ["Follow up DDA reviewer", "Confirm response timeline for load NOC comments.", "AS011", "DDA", "High", "Hassan", "In Progress", ""],
-  ["Client design comments", "Collect pending facade option decision.", "AS006", "Client", "Medium", "Sara", "Submitted", ""],
+const nocItems = [
+  "DEWA - Electricity",
+  "DEWA - Water",
+  "Telecom - Etisalat",
+  "Telecom - DU",
+  "Drainage",
+  "RTA - Temporary Fence/access",
+  "RTA - Shoring/Excavation",
+  "RTA - Gate Level",
+  "Demarcation",
+  "Soil Report",
+  "Site Survey",
 ];
+const documentItems = ["Site Plan", "Owner Emirates ID", "Consultant Appointment Letter", "Soil Report", "Site Survey Report", "Existing Drawings"];
+const seedDailyTasks = [];
 
 let state = loadState();
 let currentView = "dashboard";
 let currentProject = state.projects[0]?.code || "";
 let currentOverallProject = "";
+let currentRegisterAuthority = "";
 
 const appView = document.getElementById("appView");
 const viewTitle = document.getElementById("viewTitle");
@@ -207,15 +97,15 @@ render();
 
 function loadState() {
   const saved = localStorage.getItem(storageKey);
-  if (!saved) return cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks), completedDailyTasks: [] });
+  if (!saved) return normalizeState(cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks), completedDailyTasks: [] }));
   try {
     const parsed = JSON.parse(saved);
-    if (!parsed.projects) return cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks), completedDailyTasks: [] });
+    if (!parsed.projects) return normalizeState(cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks), completedDailyTasks: [] }));
     if (!Array.isArray(parsed.dailyTasks)) parsed.dailyTasks = [];
     if (!Array.isArray(parsed.completedDailyTasks)) parsed.completedDailyTasks = [];
-    return cleanupDailyTasks(parsed);
+    return normalizeState(cleanupDailyTasks(parsed));
   } catch {
-    return cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks), completedDailyTasks: [] });
+    return normalizeState(cleanupDailyTasks({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks), completedDailyTasks: [] }));
   }
 }
 
@@ -253,7 +143,7 @@ function filteredProjects() {
   const q = searchInput.value.trim().toLowerCase();
   const status = statusFilter.value;
   return state.projects.filter((project) => {
-    const haystack = [project.code, project.name, project.client, project.location, project.status, project.phase, project.lead].join(" ").toLowerCase();
+    const haystack = [project.code, project.name, project.client, project.location, project.status, project.phase, project.authority, project.developer, project.lead].join(" ").toLowerCase();
     return (!q || haystack.includes(q)) && (!status || project.status === status);
   });
 }
@@ -322,7 +212,10 @@ function renderOverall() {
 function renderProjectIndex() {
   viewEyebrow.textContent = "Register";
   viewTitle.textContent = "Overall Projects";
-  appView.innerHTML = `<div class="panel"><div class="panel-title">Project Register</div>${projectTable(filteredProjects())}</div>`;
+  const projects = filteredProjects();
+  const registerProjects = currentRegisterAuthority ? projects.filter((project) => project.authority === currentRegisterAuthority) : projects;
+  appView.innerHTML = `<div class="panel"><div class="panel-title"><span>Project Register</span>${registerAuthorityFilter()}</div>${projectTable(registerProjects)}</div>`;
+  bindRegisterFilters();
 }
 
 function renderProject(code) {
@@ -331,11 +224,12 @@ function renderProject(code) {
     appView.innerHTML = `<div class="empty-state">No projects found.</div>`;
     return;
   }
+  ensureProjectLists(project);
   viewEyebrow.textContent = project.code;
   viewTitle.textContent = project.name;
   appView.innerHTML = `
     <div class="project-header">
-      <div class="panel">
+      <div class="panel project-details-panel">
         <div class="panel-title">Project Details</div>
         <div class="detail-grid">
           ${projectField(project, "code", "Project Code")}
@@ -345,18 +239,12 @@ function renderProject(code) {
           ${projectField(project, "status", "Overall Status")}
           ${projectField(project, "phase", "Current Phase")}
           ${projectField(project, "priority", "Priority")}
-          ${projectField(project, "lead", "Project Lead")}
+          ${projectField(project, "authority", "Authority")}
+          ${projectField(project, "developer", "Developer")}
         </div>
       </div>
-      <div class="panel">
-        <div class="panel-title">Schedule Summary</div>
-        <div class="detail-grid">
-          ${projectField(project, "lpo", "LPO Date")}
-          ${projectField(project, "target", "Target Completion")}
-          ${projectField(project, "complete", "% Complete")}
-          ${projectField(project, "notes", "Management Notes")}
-        </div>
-      </div>
+      ${checklistPanel(project, "nocs", "LIST OF NOCS", "NOC", options.nocStatuses)}
+      ${checklistPanel(project, "documents", "LIST OF DOCS", "Document", options.documentStatuses)}
     </div>
     <div class="section-stack">
       ${trackerPanel(project, "design", "Design Tracker", designColumns, "blue")}
@@ -369,7 +257,37 @@ function renderProject(code) {
 function projectField(project, key, label) {
   if (key === "status") return `<label>${label}</label><div>${selectControl(options.projectStatuses, project[key], `data-project="${project.code}" data-field="${key}"`)}</div>`;
   if (key === "priority") return `<label>${label}</label><div>${selectControl(options.priorities, project[key], `data-project="${project.code}" data-field="${key}"`)}</div>`;
+  if (key === "authority") return `<label>${label}</label><div>${selectControl(options.projectAuthorities, project[key], `data-project="${project.code}" data-field="${key}"`)}</div>`;
   return `<label>${label}</label><div contenteditable="true" spellcheck="false" data-project="${project.code}" data-field="${key}">${escapeHtml(project[key] ?? "")}</div>`;
+}
+
+function registerAuthorityFilter() {
+  return `<label class="heading-filter">Authority ${selectControl(["All Authorities", ...options.projectAuthorities], currentRegisterAuthority || "All Authorities", "id=\"registerAuthorityFilter\" aria-label=\"Authority filter\"")}</label>`;
+}
+
+function bindRegisterFilters() {
+  const filter = document.getElementById("registerAuthorityFilter");
+  if (!filter) return;
+  filter.addEventListener("change", () => {
+    currentRegisterAuthority = filter.value === "All Authorities" ? "" : filter.value;
+    render();
+  });
+}
+
+function checklistPanel(project, key, title, itemLabel, statuses) {
+  return `
+    <div class="panel checklist-panel">
+      <div class="panel-title">${title}</div>
+      <div class="table-wrap compact-table-wrap">
+        <table class="compact-table">
+          <thead><tr><th>${itemLabel}</th><th>Status</th></tr></thead>
+          <tbody>${project[key].map((row, rowIndex) => `<tr>
+            <td>${escapeHtml(row[0])}</td>
+            <td>${selectControl(statuses, row[1], `data-checklist="${key}" data-row="${rowIndex}"`)}</td>
+          </tr>`).join("")}</tbody>
+        </table>
+      </div>
+    </div>`;
 }
 
 function trackerPanel(project, key, title, columns, color) {
@@ -388,16 +306,25 @@ function trackerPanel(project, key, title, columns, color) {
 }
 
 function editableRow(code, section, row, rowIndex, columnCount) {
+  const locked = isLockedRow(row, columnCount);
   const cells = Array.from({ length: columnCount }, (_, colIndex) => {
     const value = row[colIndex] ?? "";
     const selectOptions = selectOptionsForCell(section, colIndex);
+    if (locked) {
+      const rendered = isStatusColumn(section, colIndex) ? statusPill(value) : escapeHtml(value);
+      return `<td class="locked-cell ${section === "design" && colIndex === 0 ? "stage-group-cell" : ""}">${rendered}</td>`;
+    }
     if (selectOptions) {
-      return `<td>${selectControl(selectOptions, value, `data-project="${code}" data-section="${section}" data-row="${rowIndex}" data-col="${colIndex}"`)}</td>`;
+      const stageAttr = section === "design" && colIndex === 0 ? ' data-stage-group="true"' : "";
+      return `<td>${selectControl(selectOptions, value, `data-project="${code}" data-section="${section}" data-row="${rowIndex}" data-col="${colIndex}"${stageAttr}`)}</td>`;
     }
     const rendered = isStatusColumn(section, colIndex) ? statusPill(value) : escapeHtml(value);
     return `<td contenteditable="true" spellcheck="false" data-project="${code}" data-section="${section}" data-row="${rowIndex}" data-col="${colIndex}">${rendered}</td>`;
   }).join("");
-  return `<tr>${cells}<td><button class="small-button" data-delete-row="${section}" data-row="${rowIndex}">Delete</button></td></tr>`;
+  const actions = locked
+    ? `<button class="small-button edit" data-edit-row="${section}" data-row="${rowIndex}">Edit</button>`
+    : `<div class="row-actions"><button class="symbol-button success" data-lock-row="${section}" data-row="${rowIndex}" title="Lock row" aria-label="Lock row">&check;</button><button class="symbol-button danger" data-delete-row="${section}" data-row="${rowIndex}" title="Delete row" aria-label="Delete row">&times;</button></div>`;
+  return `<tr class="${locked ? "locked-row" : ""}">${cells}<td>${actions}</td></tr>`;
 }
 
 function bindProjectEditors(project) {
@@ -422,6 +349,13 @@ function bindProjectEditors(project) {
       const row = Number(select.dataset.row);
       const col = Number(select.dataset.col);
       project[select.dataset.section][row][col] = select.value;
+      saveState();
+      render();
+    });
+  });
+  appView.querySelectorAll("select[data-checklist]").forEach((select) => {
+    select.addEventListener("change", () => {
+      project[select.dataset.checklist][Number(select.dataset.row)][1] = select.value;
       saveState();
       render();
     });
@@ -455,15 +389,37 @@ function bindProjectEditors(project) {
       render();
     });
   });
+  appView.querySelectorAll("[data-lock-row]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const section = button.dataset.lockRow;
+      const rowIndex = Number(button.dataset.row);
+      const columns = section === "design" ? designColumns : section === "approvals" ? approvalColumns : constructionColumns;
+      const row = project[section].splice(rowIndex, 1)[0];
+      row[columns.length] = "__locked";
+      project[section].push(row);
+      saveState();
+      render();
+    });
+  });
+  appView.querySelectorAll("[data-edit-row]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const section = button.dataset.editRow;
+      const rowIndex = Number(button.dataset.row);
+      const columns = section === "design" ? designColumns : section === "approvals" ? approvalColumns : constructionColumns;
+      project[section][rowIndex][columns.length] = "";
+      saveState();
+      render();
+    });
+  });
 }
 
 function projectTable(projects) {
   return `<div class="table-wrap"><table>
-    <thead><tr>${["Project Code", "Project", "Client", "Location", "Overall Status", "Current Phase", "Priority", "Project Lead", "LPO Date", "Target Completion", "% Complete", "Management Notes"].map((h) => `<th>${h}</th>`).join("")}</tr></thead>
+    <thead><tr>${["Project Code", "Project", "Client", "Location", "Overall Status", "Current Phase", "Priority", "Developer", "LPO Date", "Target Completion", "% Complete", "Authority"].map((h) => `<th>${h}</th>`).join("")}</tr></thead>
     <tbody>${projects.map((p) => `<tr>
       <td>${escapeHtml(p.code)}</td><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.client)}</td><td>${escapeHtml(p.location)}</td>
-      <td>${statusPill(p.status)}</td><td>${escapeHtml(p.phase)}</td><td>${escapeHtml(p.priority)}</td><td>${escapeHtml(p.lead)}</td>
-      <td>${escapeHtml(p.lpo)}</td><td>${escapeHtml(p.target)}</td><td>${Number(p.complete) || 0}%</td><td>${escapeHtml(p.notes)}</td>
+      <td>${statusPill(p.status)}</td><td>${escapeHtml(p.phase)}</td><td>${escapeHtml(p.priority)}</td><td>${escapeHtml(p.developer)}</td>
+      <td>${escapeHtml(p.lpo)}</td><td>${escapeHtml(p.target)}</td><td>${Number(p.complete) || 0}%</td><td>${escapeHtml(p.authority)}</td>
     </tr>`).join("")}</tbody>
   </table></div>`;
 }
@@ -491,7 +447,7 @@ function dailyTaskRow(row, rowIndex) {
     const rendered = colIndex === 6 ? statusPill(value) : escapeHtml(value);
     return `<td contenteditable="true" spellcheck="false" data-daily-row="${rowIndex}" data-daily-col="${colIndex}">${rendered}</td>`;
   }).join("");
-  return `<tr>${cells}<td><div class="row-actions"><button class="small-button success" data-complete-daily="${rowIndex}">Completed</button><button class="small-button" data-delete-daily="${rowIndex}">Delete</button></div></td></tr>`;
+  return `<tr>${cells}<td><div class="row-actions"><button class="small-button success" data-complete-daily="${rowIndex}">Completed</button><button class="small-button danger" data-delete-daily="${rowIndex}">Delete</button></div></td></tr>`;
 }
 
 function dailyTaskOptions(colIndex) {
@@ -552,7 +508,7 @@ function bindDailyTasks() {
 
 function overallProjectFilter(projects) {
   const values = ["All Projects", ...projects.map((project) => project.code)];
-  return `<label class="heading-filter">Project ${selectControl(values, currentOverallProject || "All Projects", "id=\"overallProjectFilter\"")}</label>`;
+  return `<label class="heading-filter">${selectControl(values, currentOverallProject || "All Projects", "id=\"overallProjectFilter\" aria-label=\"Project filter\"")}</label>`;
 }
 
 function bindOverallFilters() {
@@ -633,6 +589,10 @@ function isStatusColumn(section, colIndex) {
   return (section === "design" && colIndex === 9) || (section === "approvals" && colIndex === 6) || (section === "construction" && colIndex === 7);
 }
 
+function isLockedRow(row, columnCount) {
+  return row[columnCount] === "__locked";
+}
+
 function selectOptionsForCell(section, colIndex) {
   if (section === "design" && colIndex === 0) return options.designStages;
   if (section === "design" && colIndex === 2) return options.disciplines;
@@ -648,15 +608,27 @@ function selectOptionsForCell(section, colIndex) {
 function selectControl(values, value, attrs) {
   const current = String(value || "");
   const allValues = current && !values.includes(current) ? [current, ...values] : values;
-  return `<select class="cell-select" ${attrs}>
+  const statusClass = statusSelectClass(values, current);
+  const stageClass = attrs.includes("data-stage-group") ? " stage-select" : "";
+  return `<select class="cell-select${statusClass}${stageClass}" ${attrs}>
     ${allValues.map((option) => `<option value="${escapeHtml(option)}" ${option === current ? "selected" : ""}>${escapeHtml(option)}</option>`).join("")}
   </select>`;
 }
 
+function statusSelectClass(values, current) {
+  const statusValues = new Set([...options.designStatuses, ...options.approvalStatuses, ...options.constructionStatuses, ...options.dailyStatuses, ...options.projectStatuses, ...options.nocStatuses, ...options.documentStatuses]);
+  const statusClass = values.some((value) => statusValues.has(value)) ? ` status-select status-${statusClassName(current || values[0])}` : "";
+  return `${statusClass}`;
+}
+
 function statusPill(status) {
   const value = String(status || "Not Started");
-  const klass = value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const klass = statusClassName(value);
   return `<span class="status-pill status-${klass}">${escapeHtml(value)}</span>`;
+}
+
+function statusClassName(value) {
+  return String(value || "Not Started").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 function cleanupDailyTasks(sourceState) {
@@ -664,6 +636,28 @@ function cleanupDailyTasks(sourceState) {
   sourceState.dailyTasks = normalizeDailyRows(sourceState.dailyTasks || []).filter((row) => row[6] !== "Done" || !row[7] || row[7] >= today);
   sourceState.completedDailyTasks = normalizeDailyRows(sourceState.completedDailyTasks || []);
   return sourceState;
+}
+
+function normalizeState(sourceState) {
+  sourceState.projects = (sourceState.projects || []).map((project) => {
+    ensureProjectLists(project);
+    return project;
+  });
+  return sourceState;
+}
+
+function ensureProjectLists(project) {
+  if (project.authority == null) project.authority = project.approvals?.[0]?.[0] || "";
+  if (!options.projectAuthorities.includes(project.authority)) project.authority = project.approvals?.find((row) => options.projectAuthorities.includes(row[0]))?.[0] || "Dubai Municipality";
+  if (project.developer == null) project.developer = "";
+  project.nocs = mergeChecklist(project.nocs, nocItems, "Not Applicable");
+  project.documents = mergeChecklist(project.documents, documentItems, "Pending");
+  return project;
+}
+
+function mergeChecklist(existingRows, itemNames, defaultStatus) {
+  const existing = new Map((existingRows || []).map((row) => [row[0], row[1] || defaultStatus]));
+  return itemNames.map((item) => [item, existing.get(item) || defaultStatus]);
 }
 
 function normalizeDailyRows(rows) {
@@ -698,6 +692,8 @@ function addProject() {
     phase: "Preliminary Design",
     priority: "Medium",
     lead: "",
+    authority: "",
+    developer: "",
     lpo: "",
     target: "",
     complete: 0,
@@ -705,6 +701,8 @@ function addProject() {
     design: [],
     approvals: [],
     construction: [],
+    nocs: mergeChecklist([], nocItems, "Not Applicable"),
+    documents: mergeChecklist([], documentItems, "Pending"),
   };
   state.projects.push(project);
   currentProject = project.code;
@@ -733,7 +731,7 @@ function importData(event) {
       if (!Array.isArray(imported.projects)) throw new Error("Missing projects array");
       if (!Array.isArray(imported.dailyTasks)) imported.dailyTasks = [];
       if (!Array.isArray(imported.completedDailyTasks)) imported.completedDailyTasks = [];
-      state = cleanupDailyTasks(imported);
+      state = normalizeState(cleanupDailyTasks(imported));
       currentProject = state.projects[0]?.code || "";
       currentOverallProject = "";
       saveState();
@@ -747,7 +745,7 @@ function importData(event) {
 
 function resetData() {
   if (!confirm("Reset tracker to sample data?")) return;
-  state = { projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks), completedDailyTasks: [] };
+  state = normalizeState({ projects: structuredClone(seedProjects), dailyTasks: structuredClone(seedDailyTasks), completedDailyTasks: [] });
   currentProject = state.projects[0]?.code || "";
   currentOverallProject = "";
   currentView = "dashboard";
