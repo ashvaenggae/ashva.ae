@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Project Operations Tracker</title>
-    <link rel="stylesheet" href="./styles.css?v=20260706-1105" />
+    <link rel="stylesheet" href="./styles.css?v=20260723-1120" />
   </head>
   <body>
     <div class="app-shell">
@@ -35,12 +35,7 @@
 
         <div class="sidebar-actions">
           <button class="icon-button" id="addProjectBtn" title="Add project">+</button>
-          <button class="icon-button" id="exportBtn" title="Export JSON">EX</button>
-          <label class="icon-button file-button" title="Import JSON">
-            IM
-            <input id="importFile" type="file" accept="application/json" />
-          </label>
-          <button class="icon-button danger" id="resetBtn" title="Reset sample data">RS</button>
+          <button class="icon-button danger" id="deleteProjectBtn" title="Delete selected project">&times;</button>
         </div>
       </aside>
 
@@ -73,6 +68,6 @@
       <td contenteditable="true" spellcheck="false"></td>
     </template>
 
-    <script src="./app.js?v=20260706-1105"></script>
+    <script src="./app.js?v=20260723-1120"></script>
   </body>
 </html>

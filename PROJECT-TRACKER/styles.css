@@ -134,6 +134,7 @@ select {
 .sidebar-actions {
   margin-top: auto;
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 

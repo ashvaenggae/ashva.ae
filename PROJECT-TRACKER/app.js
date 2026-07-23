@@ -1,4 +1,4 @@
-const storageKey = "design-consultancy-project-tracker-v5";
+const storageKey = "design-consultancy-project-tracker-v8";
 
 const options = {
   designStages: ["PRELIMINARY", "FINAL", "TENDER"],
@@ -17,7 +17,7 @@ const options = {
 };
 
 const seedProjects = [
-  {
+  seedProject({
     code: "AS005",
     name: "PROPOSED B+G+1+Roof Villa",
     client: "R Mdhavan",
@@ -43,7 +43,64 @@ const seedProjects = [
       ["DDA", "Submission", "2026-04-25", "", "2026-05-20", "", "Rejected", "High", "Hassan", "960Kw only.", "Revise load schedule."],
     ],
     construction: [["Tender / Contractor Selection", "TBC", "2026-04-24", "2026-05-25", "", "", "0", "Not Started", "High", "Final authority approval pending.", "Prepare tender list."]],
-  },
+  }),
+  seedProject({
+    code: "AS006",
+    name: "Arabian Ranches Peter Erwee",
+    client: "Peter Erwee",
+    location: "Arabian Ranches",
+    authority: "Dubai Municipality",
+    developer: "Dubai Properties",
+    phase: "Preliminary Design",
+    priority: "Medium",
+  }),
+  seedProject({
+    code: "AS007",
+    name: "Aghora JAFZA Mezzanine",
+    client: "Aghora",
+    location: "JAFZA",
+    authority: "Trakhees",
+    developer: "JAFZA",
+    phase: "Authority Approvals",
+    priority: "High",
+  }),
+  seedProject({
+    code: "AS008",
+    name: "Airsoft Games - KIZAD Ideaplus",
+    client: "Ideaplus",
+    location: "KIZAD",
+    authority: "Dubai Municipality",
+    developer: "KIZAD",
+    phase: "Preliminary Design",
+    priority: "Medium",
+  }),
+  seedProject({
+    code: "AS009",
+    name: "Dubai Safari Park - Elephant Enclosure",
+    client: "Dubai Safari Park",
+    location: "Dubai Safari Park",
+    authority: "Dubai Municipality",
+    developer: "Dubai Safari Park",
+    phase: "Preliminary Design",
+    priority: "Medium",
+  }),
+  seedProject({
+    code: "AS010",
+    name: "Bayan - As-Built Drawings",
+    client: "Bayan",
+    authority: "Dubai Municipality",
+    phase: "Design",
+    priority: "Medium",
+  }),
+  seedProject({
+    code: "AS012",
+    name: "Battlepark Warehouse Mezzanine - Al Quoz",
+    client: "Battlepark",
+    location: "Al Quoz",
+    authority: "Dubai Municipality",
+    phase: "Authority Approvals",
+    priority: "High",
+  }),
 ];
 
 const designColumns = ["Stage Group", "Stage Description", "Discipline", "Owner", "Planned Start", "Duration Days", "ETS", "Submission Date", "Actual Approval", "Status", "Delay Reason / Action"];
@@ -66,6 +123,29 @@ const nocItems = [
 const documentItems = ["Site Plan", "Owner Emirates ID", "Consultant Appointment Letter", "Soil Report", "Site Survey Report", "Existing Drawings"];
 const seedDailyTasks = [];
 
+function seedProject(project) {
+  const authority = project.authority || "Dubai Municipality";
+  const priority = project.priority || "Medium";
+  return {
+    client: "",
+    location: "",
+    status: "Active",
+    phase: "Preliminary Design",
+    priority,
+    lead: "",
+    authority,
+    developer: "",
+    lpo: "",
+    target: "",
+    complete: 0,
+    notes: "",
+    design: [["PRELIMINARY", "Preliminary design", "Architecture", "", "", "", "", "", "", "Not Started", ""]],
+    approvals: [[authority, "Submission", "", "", "", "", "Not Started", priority, "", "", ""]],
+    construction: [["Tender / Contractor Selection", "", "", "", "", "", "0", "Not Started", priority, "", ""]],
+    ...project,
+  };
+}
+
 let state = loadState();
 let currentView = "dashboard";
 let currentProject = state.projects[0]?.code || "";
@@ -87,9 +167,7 @@ document.querySelectorAll(".nav-item").forEach((button) => {
 });
 
 document.getElementById("addProjectBtn").addEventListener("click", addProject);
-document.getElementById("exportBtn").addEventListener("click", exportData);
-document.getElementById("importFile").addEventListener("change", importData);
-document.getElementById("resetBtn").addEventListener("click", resetData);
+document.getElementById("deleteProjectBtn").addEventListener("click", deleteProject);
 searchInput.addEventListener("input", render);
 statusFilter.addEventListener("change", render);
 
@@ -142,10 +220,30 @@ function renderSidebar() {
 function filteredProjects() {
   const q = searchInput.value.trim().toLowerCase();
   const status = statusFilter.value;
-  return state.projects.filter((project) => {
+  return sortedProjects(state.projects).filter((project) => {
     const haystack = [project.code, project.name, project.client, project.location, project.status, project.phase, project.authority, project.developer, project.lead].join(" ").toLowerCase();
     return (!q || haystack.includes(q)) && (!status || project.status === status);
   });
+}
+
+function sortedProjects(projects) {
+  return [...projects].sort(compareProjectsByCode);
+}
+
+function compareProjectsByCode(a, b) {
+  const aCode = normalizeProjectCode(a.code);
+  const bCode = normalizeProjectCode(b.code);
+  return aCode.prefix.localeCompare(bCode.prefix, undefined, { sensitivity: "base" }) || aCode.number - bCode.number || aCode.suffix.localeCompare(bCode.suffix, undefined, { numeric: true, sensitivity: "base" });
+}
+
+function normalizeProjectCode(code) {
+  const value = String(code || "").trim();
+  const match = value.match(/^([a-zA-Z]*?)\s*0*(\d+)\s*(.*)$/);
+  return {
+    prefix: match?.[1] || value,
+    number: match ? Number(match[2]) : Number.MAX_SAFE_INTEGER,
+    suffix: match?.[3] || "",
+  };
 }
 
 function renderDashboard() {
@@ -451,7 +549,7 @@ function dailyTaskRow(row, rowIndex) {
 }
 
 function dailyTaskOptions(colIndex) {
-  if (colIndex === 2) return state.projects.map((project) => project.code);
+  if (colIndex === 2) return sortedProjects(state.projects).map((project) => project.code);
   if (colIndex === 3) return options.dailyFor;
   if (colIndex === 4) return options.priorities;
   if (colIndex === 6) return options.dailyStatuses;
@@ -642,7 +740,7 @@ function normalizeState(sourceState) {
   sourceState.projects = (sourceState.projects || []).map((project) => {
     ensureProjectLists(project);
     return project;
-  });
+  }).sort(compareProjectsByCode);
   return sourceState;
 }
 
@@ -705,8 +803,27 @@ function addProject() {
     documents: mergeChecklist([], documentItems, "Pending"),
   };
   state.projects.push(project);
+  state.projects.sort(compareProjectsByCode);
   currentProject = project.code;
   currentView = "project";
+  saveState();
+  render();
+}
+
+function deleteProject() {
+  const project = state.projects.find((item) => item.code === currentProject) || sortedProjects(state.projects)[0];
+  if (!project) {
+    alert("No project available to delete.");
+    return;
+  }
+  if (!confirm(`Delete project ${project.code} - ${project.name}? This will also remove related daily task entries.`)) return;
+  state.projects = state.projects.filter((item) => item !== project).sort(compareProjectsByCode);
+  state.dailyTasks = (state.dailyTasks || []).filter((row) => row[2] !== project.code);
+  state.completedDailyTasks = (state.completedDailyTasks || []).filter((row) => row[2] !== project.code);
+  currentProject = sortedProjects(state.projects)[0]?.code || "";
+  currentOverallProject = currentOverallProject === project.code ? "" : currentOverallProject;
+  currentRegisterAuthority = "";
+  if (!state.projects.length) currentView = "dashboard";
   saveState();
   render();
 }
