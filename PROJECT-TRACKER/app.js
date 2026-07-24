@@ -1,4 +1,4 @@
-const storageKey = "design-consultancy-project-tracker-v9";
+const storageKey = "design-consultancy-project-tracker-v10";
 
 const options = {
   designStages: ["PRELIMINARY", "FINAL", "TENDER"],
@@ -17,6 +17,16 @@ const options = {
 };
 
 const seedProjects = [
+  seedProject({
+    code: "AS001",
+    name: "RB 69 Dubai South",
+    client: "Harsha Varun",
+    location: "Dubai South",
+    authority: "Dubai South",
+    developer: "Dubai South",
+    phase: "Authority Approvals",
+    priority: "High",
+  }),
   seedProject({
     code: "AS002",
     name: "Jebel Ali Hills 5131197",
