@@ -1,4 +1,4 @@
-const storageKey = "design-consultancy-project-tracker-v8";
+const storageKey = "design-consultancy-project-tracker-v9";
 
 const options = {
   designStages: ["PRELIMINARY", "FINAL", "TENDER"],
@@ -17,6 +17,35 @@ const options = {
 };
 
 const seedProjects = [
+  seedProject({
+    code: "AS002",
+    name: "Jebel Ali Hills 5131197",
+    location: "Jebel Ali Hills",
+    authority: "Trakhees",
+    developer: "Jebel Ali Hills",
+    phase: "Preliminary Design",
+    priority: "Medium",
+  }),
+  seedProject({
+    code: "AS003",
+    name: "Grand Aviary - Dubai Safari Park",
+    client: "Dubai Safari Park",
+    location: "Dubai Safari Park",
+    authority: "Dubai Municipality",
+    developer: "Dubai Safari Park",
+    phase: "Preliminary Design",
+    priority: "Medium",
+  }),
+  seedProject({
+    code: "AS004",
+    name: "E 165 - Emirates Hills Amit Villa",
+    client: "Amit",
+    location: "Emirates Hills",
+    authority: "Dubai Municipality",
+    developer: "Emaar",
+    phase: "Preliminary Design",
+    priority: "Medium",
+  }),
   seedProject({
     code: "AS005",
     name: "PROPOSED B+G+1+Roof Villa",
