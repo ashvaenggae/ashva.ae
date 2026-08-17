@@ -21,18 +21,20 @@ const seedProjects = [
     code: "AS001",
     name: "RB 69 Dubai South",
     client: "Harsha Varun",
+    plotNo: "",
     location: "Dubai South",
     authority: "Dubai South",
-    developer: "Dubai South",
+    mainContractor: "",
     phase: "Authority Approvals",
     priority: "High",
   }),
   seedProject({
     code: "AS002",
     name: "Jebel Ali Hills 5131197",
+    plotNo: "",
     location: "Jebel Ali Hills",
     authority: "Trakhees",
-    developer: "Jebel Ali Hills",
+    mainContractor: "",
     phase: "Preliminary Design",
     priority: "Medium",
   }),
@@ -40,9 +42,10 @@ const seedProjects = [
     code: "AS003",
     name: "Grand Aviary - Dubai Safari Park",
     client: "Dubai Safari Park",
+    plotNo: "",
     location: "Dubai Safari Park",
     authority: "Dubai Municipality",
-    developer: "Dubai Safari Park",
+    mainContractor: "",
     phase: "Preliminary Design",
     priority: "Medium",
   }),
@@ -50,9 +53,10 @@ const seedProjects = [
     code: "AS004",
     name: "E 165 - Emirates Hills Amit Villa",
     client: "Amit",
+    plotNo: "",
     location: "Emirates Hills",
     authority: "Dubai Municipality",
-    developer: "Emaar",
+    mainContractor: "",
     phase: "Preliminary Design",
     priority: "Medium",
   }),
@@ -60,6 +64,7 @@ const seedProjects = [
     code: "AS005",
     name: "PROPOSED B+G+1+Roof Villa",
     client: "R Mdhavan",
+    plotNo: "",
     location: "Meydan District One",
     status: "Active",
     phase: "Final Design",
@@ -87,9 +92,10 @@ const seedProjects = [
     code: "AS006",
     name: "Arabian Ranches Peter Erwee",
     client: "Peter Erwee",
+    plotNo: "",
     location: "Arabian Ranches",
     authority: "Dubai Municipality",
-    developer: "Dubai Properties",
+    mainContractor: "",
     phase: "Preliminary Design",
     priority: "Medium",
   }),
@@ -97,9 +103,10 @@ const seedProjects = [
     code: "AS007",
     name: "Aghora JAFZA Mezzanine",
     client: "Aghora",
+    plotNo: "",
     location: "JAFZA",
     authority: "Trakhees",
-    developer: "JAFZA",
+    mainContractor: "",
     phase: "Authority Approvals",
     priority: "High",
   }),
@@ -107,9 +114,10 @@ const seedProjects = [
     code: "AS008",
     name: "Airsoft Games - KIZAD Ideaplus",
     client: "Ideaplus",
+    plotNo: "",
     location: "KIZAD",
     authority: "Dubai Municipality",
-    developer: "KIZAD",
+    mainContractor: "",
     phase: "Preliminary Design",
     priority: "Medium",
   }),
@@ -117,9 +125,10 @@ const seedProjects = [
     code: "AS009",
     name: "Dubai Safari Park - Elephant Enclosure",
     client: "Dubai Safari Park",
+    plotNo: "",
     location: "Dubai Safari Park",
     authority: "Dubai Municipality",
-    developer: "Dubai Safari Park",
+    mainContractor: "",
     phase: "Preliminary Design",
     priority: "Medium",
   }),
@@ -127,6 +136,7 @@ const seedProjects = [
     code: "AS010",
     name: "Bayan - As-Built Drawings",
     client: "Bayan",
+    plotNo: "",
     authority: "Dubai Municipality",
     phase: "Design",
     priority: "Medium",
@@ -135,6 +145,7 @@ const seedProjects = [
     code: "AS012",
     name: "Battlepark Warehouse Mezzanine - Al Quoz",
     client: "Battlepark",
+    plotNo: "",
     location: "Al Quoz",
     authority: "Dubai Municipality",
     phase: "Authority Approvals",
@@ -167,13 +178,14 @@ function seedProject(project) {
   const priority = project.priority || "Medium";
   return {
     client: "",
+    plotNo: "",
     location: "",
     status: "Active",
     phase: "Preliminary Design",
     priority,
     lead: "",
     authority,
-    developer: "",
+    mainContractor: "",
     lpo: "",
     target: "",
     complete: 0,
@@ -260,7 +272,7 @@ function filteredProjects() {
   const q = searchInput.value.trim().toLowerCase();
   const status = statusFilter.value;
   return sortedProjects(state.projects).filter((project) => {
-    const haystack = [project.code, project.name, project.client, project.location, project.status, project.phase, project.authority, project.developer, project.lead].join(" ").toLowerCase();
+    const haystack = [project.code, project.name, project.client, project.plotNo, project.location, project.status, project.phase, project.authority, project.mainContractor, project.lead].join(" ").toLowerCase();
     return (!q || haystack.includes(q)) && (!status || project.status === status);
   });
 }
@@ -372,12 +384,12 @@ function renderProject(code) {
           ${projectField(project, "code", "Project Code")}
           ${projectField(project, "name", "Project")}
           ${projectField(project, "client", "Client")}
+          ${projectField(project, "plotNo", "Plot No:")}
           ${projectField(project, "location", "Location")}
           ${projectField(project, "status", "Overall Status")}
           ${projectField(project, "phase", "Current Phase")}
-          ${projectField(project, "priority", "Priority")}
           ${projectField(project, "authority", "Authority")}
-          ${projectField(project, "developer", "Developer")}
+          ${projectField(project, "mainContractor", "Main Contractor")}
         </div>
       </div>
       ${checklistPanel(project, "nocs", "LIST OF NOCS", "NOC", options.nocStatuses)}
@@ -552,10 +564,10 @@ function bindProjectEditors(project) {
 
 function projectTable(projects) {
   return `<div class="table-wrap"><table>
-    <thead><tr>${["Project Code", "Project", "Client", "Location", "Overall Status", "Current Phase", "Priority", "Developer", "LPO Date", "Target Completion", "% Complete", "Authority"].map((h) => `<th>${h}</th>`).join("")}</tr></thead>
+    <thead><tr>${["Project Code", "Project", "Client", "Plot No:", "Location", "Overall Status", "Current Phase", "Main Contractor", "LPO Date", "Target Completion", "% Complete", "Authority"].map((h) => `<th>${h}</th>`).join("")}</tr></thead>
     <tbody>${projects.map((p) => `<tr>
-      <td>${escapeHtml(p.code)}</td><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.client)}</td><td>${escapeHtml(p.location)}</td>
-      <td>${statusPill(p.status)}</td><td>${escapeHtml(p.phase)}</td><td>${escapeHtml(p.priority)}</td><td>${escapeHtml(p.developer)}</td>
+      <td>${escapeHtml(p.code)}</td><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.client)}</td><td>${escapeHtml(p.plotNo)}</td><td>${escapeHtml(p.location)}</td>
+      <td>${statusPill(p.status)}</td><td>${escapeHtml(p.phase)}</td><td>${escapeHtml(p.mainContractor)}</td>
       <td>${escapeHtml(p.lpo)}</td><td>${escapeHtml(p.target)}</td><td>${Number(p.complete) || 0}%</td><td>${escapeHtml(p.authority)}</td>
     </tr>`).join("")}</tbody>
   </table></div>`;
@@ -786,7 +798,8 @@ function normalizeState(sourceState) {
 function ensureProjectLists(project) {
   if (project.authority == null) project.authority = project.approvals?.[0]?.[0] || "";
   if (!options.projectAuthorities.includes(project.authority)) project.authority = project.approvals?.find((row) => options.projectAuthorities.includes(row[0]))?.[0] || "Dubai Municipality";
-  if (project.developer == null) project.developer = "";
+  if (project.plotNo == null) project.plotNo = "";
+  if (project.mainContractor == null) project.mainContractor = "";
   project.nocs = mergeChecklist(project.nocs, nocItems, "Not Applicable");
   project.documents = mergeChecklist(project.documents, documentItems, "Pending");
   return project;
@@ -824,13 +837,14 @@ function addProject() {
     code: `AS${next}`,
     name: "New Project",
     client: "",
+    plotNo: "",
     location: "",
     status: "Active",
     phase: "Preliminary Design",
     priority: "Medium",
     lead: "",
     authority: "",
-    developer: "",
+    mainContractor: "",
     lpo: "",
     target: "",
     complete: 0,
